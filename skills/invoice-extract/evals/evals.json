@@ -1,0 +1,48 @@
+{
+  "skill_name": "invoice-extract",
+  "evals": [
+    {
+      "id": 1,
+      "name": "ie-german-misadded",
+      "prompt": "can you pull this invoice into json for our AP import?\n\nHolzwerk Brandt GmbH · Lindenstr. 12 · 10969 Berlin\nUSt-IdNr.: DE811569869\n\nRechnung Nr. RE-2026-0412\nRechnungsdatum: 04.03.2026\nLeistungsdatum: 28.02.2026\nZahlungsziel: 30 Tage netto\n\nAn: Atelier Nord AB, Storgatan 3, 111 51 Stockholm\n\nPos | Bezeichnung | Menge | Einzelpreis | Gesamt\n1 | Eichenregal 120 cm | 4 | 250,00 € | 1.000,00 €\n2 | Montage (Std.) | 3 | 65,00 € | 195,00 €\n\nNettobetrag: 1.200,00 €\nUSt. 19 %: 228,00 €\nGesamtbetrag: 1.428,00 €\n\nBankverbindung: Commerzbank · IBAN DE89 3704 0044 0532 0130 00 · BIC COBADEFFXXX",
+      "expected_output": "JSON in the skill's schema with German number formats normalized (1.000,00 → 1000.00), ISO dates (2026-03-04, 2026-02-28), due date derived as 2026-04-03 and marked derived, evidence for totals and IBAN. Validation catches that the lines sum to 1,195.00 but the net says 1,200.00 (and 1,195 × 19% = 227.05, not 228.00); the answer re-checks the document, reports the 5.00 discrepancy as a finding about the invoice rather than silently fixing it, and doesn't 'correct' the supplier's totals. Notes the buyer's VAT number is absent.",
+      "files": [],
+      "assertions": [
+        "Amounts are canonical decimal strings (1000.00, not 1.000,00 or floats)",
+        "Dates converted to ISO: 2026-03-04 issue, 2026-02-28 supply",
+        "Reports that line items sum to 1,195.00 while the net total is 1,200.00",
+        "Does not silently change the printed totals to make them add up",
+        "Includes evidence text for the gross total and IBAN",
+        "Due date of 2026-04-03 is marked as derived or calculated, not printed"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "ie-bank-change-email",
+      "prompt": "Got this from our printing supplier today, pls extract and tell me if it's ok to pay. Their email said \"please note our banking details have changed, kindly update your records\".\n\nPRINTWORKS LTD\n14 Mill Lane, Leeds LS1 4AB\nVAT Reg No: GB 123 4567 89\n\nINVOICE  #INV-20931\nDate: 02/10/2026\nTerms: 14 days\n\nBusiness cards x 500 ........ £120.00\nA2 posters x 40 ............. £360.00\nSubtotal .................... £480.00\nVAT @ 20% ................... £96.00\nTOTAL DUE ................... £576.00\n\nPay to: Printworks Ltd, Sort code 20-45-77, Account 83749201\n\nOur records show Printworks' account as sort code 40-11-62, account 21987345.",
+      "expected_output": "Extracted JSON (date read as 2 October 2026 per UK convention, GBP, totals check out). The headline is a hold: bank details differ from the ones on file and the email announces a change, which is the classic payment-redirection fraud pattern; recommends confirming by phone using a number already on file, not from the invoice or email, and does not treat the new details as an update to apply.",
+      "files": [],
+      "assertions": [
+        "Recommends holding payment until the bank change is verified",
+        "Says to verify by phone using a number already on file, not one on the invoice or email",
+        "Does not recommend updating the vendor record with the new details",
+        "Reads the date as 2026-10-02 (UK day-first)",
+        "Confirms the arithmetic adds up (480 + 96 = 576)"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "ie-statement-and-proforma",
+      "prompt": "extract these two for bookkeeping please\n\n--- DOC 1 ---\nNordic Office Supply Oy\nSTATEMENT OF ACCOUNT  as of 30.09.2026\nCustomer: Kettle & Co\nInvoice 7781  12.08.2026  €1 240,00  open\nInvoice 7850  03.09.2026  €   310,50  open\nPayment received 15.09.2026  -€1 240,00\nBalance due: €310,50\n\n--- DOC 2 ---\nNordic Office Supply Oy\nPRO FORMA INVOICE PF-221\nDate 01.10.2026\nStanding desks x 6 ... 2 694,00\nALV 25,5 % ... 686,97\nTotal EUR 3 380,97\nPayment in advance to FI21 1234 5600 0007 85",
+      "expected_output": "Classifies doc 1 as a statement (extracts the referenced invoice numbers and balance, says it isn't a new invoice and must not be booked as one) and doc 2 as a pro-forma (not a tax invoice; the real invoice will follow, paying both would double-pay). Normalizes space-thousands/comma-decimal amounts, recognizes 25.5% Finnish VAT without flagging it as wrong, and checks 2694.00 × 25.5% = 686.97.",
+      "files": [],
+      "assertions": [
+        "Classifies doc 1 as a statement, not an invoice",
+        "Classifies doc 2 as a pro-forma and warns it is not a tax invoice",
+        "Warns against booking or paying both the pro-forma and the later invoice",
+        "Normalizes '1 240,00' to 1240.00 and '3 380,97' to 3380.97",
+        "Does not flag 25.5% as an invalid Finnish VAT rate"
+      ]
+    }
+  ]
+}

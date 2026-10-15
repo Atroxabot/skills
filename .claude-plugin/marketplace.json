@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "A curated set of Agent Skills for Claude from atroxabot.com",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
     {
@@ -15,6 +15,25 @@
       "strict": false,
       "skills": [
         "./skills/humanizer"
+      ]
+    },
+    {
+      "name": "engineering-skills",
+      "description": "Skills for engineering work: directive, agent-ready implementation specs, and checking and fixing a domain's email authentication (SPF, DKIM, DMARC)",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/spec-writer",
+        "./skills/email-dns-auth"
+      ]
+    },
+    {
+      "name": "business-skills",
+      "description": "Skills for business operations, starting with invoice and receipt extraction that validates every figure and flags invoices that shouldn't be paid as-is",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/invoice-extract"
       ]
     }
   ]

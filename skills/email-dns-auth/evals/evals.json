@@ -1,0 +1,48 @@
+{
+  "skill_name": "email-dns-auth",
+  "evals": [
+    {
+      "id": 1,
+      "name": "eda-newsletter-dmarc-fail",
+      "prompt": "Our newsletter (sent through SendGrid) has started bouncing at Gmail with '550 5.7.26 Unauthenticated email from acme.io is not accepted due to domain's DMARC policy'. Our IT guy already added include:sendgrid.net to our SPF record last week and it didn't help. Here are the headers from a copy that made it to my gmail:\n\nAuthentication-Results: mx.google.com;\n       dkim=pass header.i=@sendgrid.info header.s=smtpapi header.b=Ab12;\n       spf=pass (google.com: domain of bounces+123@em4821.sendgrid.net designates 167.89.1.2 as permitted sender) smtp.mailfrom=\"bounces+123@em4821.sendgrid.net\";\n       dmarc=fail (p=QUARANTINE sp=QUARANTINE dis=QUARANTINE) header.from=acme.io\nReturn-Path: <bounces+123@em4821.sendgrid.net>\nDKIM-Signature: v=1; a=rsa-sha256; d=sendgrid.info; s=smtpapi; h=from:subject; bh=x; b=y\nFrom: Acme <news@acme.io>\nList-Unsubscribe: <mailto:unsub@acme.io>\n\nWhat do we do?",
+      "expected_output": "Explains in plain language that SPF and DKIM pass but for SendGrid's domains, not acme.io, so DMARC (which needs alignment with the From domain) fails, and that this is why the SPF include didn't help. The fix is SendGrid domain authentication (custom DKIM CNAMEs s1/s2 plus the em return-path CNAME), with values copied from the SendGrid dashboard. Recommends removing the now-useless include if automated security is used, and flags missing one-click unsubscribe (https List-Unsubscribe plus List-Unsubscribe-Post) required for bulk mail to Gmail. Says how to verify (send a test, check dmarc=pass with header.d=acme.io). Does not suggest weakening DMARC to p=none as the fix.",
+      "files": [],
+      "assertions": [
+        "Explains that DMARC fails because the passing SPF and DKIM domains don't align with acme.io",
+        "Explains why adding include:sendgrid.net to SPF didn't help",
+        "Recommends SendGrid domain authentication / custom DKIM so mail is signed with d=acme.io",
+        "Flags the missing one-click unsubscribe headers",
+        "Does not recommend lowering the DMARC policy to p=none as the fix",
+        "Gives a way to verify the fix with a real message"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "eda-spf-too-many-lookups",
+      "prompt": "can you check this SPF record? we just added zendesk and since then some customers say our emails from google workspace go to spam\n\nTXT @ \"v=spf1 include:_spf.google.com include:spf.protection.outlook.com include:servers.mcsv.net include:mail.zendesk.com include:_spf.salesforce.com include:sendgrid.net include:mktomail.com include:spf.mandrillapp.com include:_spf.intuit.com ip4:203.0.113.10 ~all\"\nTXT @ \"v=spf1 include:mail.zendesk.com ~all\"\n\nWe don't use Outlook anymore, we moved to google last year.",
+      "expected_output": "Finds two problems: two SPF records (a permanent error, so SPF fails for everything; this is what broke when Zendesk was added as a second record) and a lookup count at or over the 10-lookup limit. Recommends one merged record, dropping the unused Microsoft include (and asking which other services are still used, e.g. Mailchimp vs Mandrill), and gives the merged record ready to paste. Explains in plain language, warns against flattening as the default, and suggests verifying with the check script after publishing.",
+      "files": [],
+      "assertions": [
+        "Identifies the two separate SPF records as a fatal error",
+        "Identifies the 10 DNS lookup limit as a risk or violation",
+        "Recommends removing the unused Microsoft 365 include",
+        "Provides a single merged SPF record ready to paste",
+        "Does not recommend SPF flattening as the primary fix"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "eda-parked-domain",
+      "prompt": "We own acme-shop.com and acme.co but never send email from them, they just redirect to our main site. Someone told me scammers could use them for phishing. What should I put in DNS?",
+      "expected_output": "Explains briefly why unused domains are attractive for spoofing, then gives the locked-down record set for each domain: SPF 'v=spf1 -all', DMARC 'v=DMARC1; p=reject;' at _dmarc, and a null MX '0 .', optionally a wildcard revoked DKIM record. Notes these are safe to apply immediately because no legitimate mail is sent, mentions host-name formatting differences between DNS providers, and suggests verifying with the check script.",
+      "files": [],
+      "assertions": [
+        "Recommends v=spf1 -all for each domain",
+        "Recommends a DMARC record with p=reject at _dmarc",
+        "Recommends a null MX record (0 .)",
+        "Says it's safe to go straight to reject because the domains send no mail",
+        "Presents the records in a paste-ready form for both domains"
+      ]
+    }
+  ]
+}

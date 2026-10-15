@@ -1,0 +1,52 @@
+{
+  "skill_name": "spec-writer",
+  "evals": [
+    {
+      "id": 1,
+      "name": "sw-rate-limit-agent-brief",
+      "prompt": "write a spec I can hand to claude code to add rate limiting to our public API. it's a fastapi app, redis is already in the stack for sessions. we got hammered by a scraper last week. free plan should get less than paid. keep it tight, I don't want it rewriting half the codebase",
+      "expected_output": "A directive spec (or agent brief) with: a decision on the algorithm and storage (Redis, with the reason) instead of options; concrete numbers for free vs paid limits, or an open question with a stated default; exact 429 behavior with the Retry-After header and the error body; which identity is limited (API key, falling back to IP for unauthenticated requests); behavior when Redis is down (fail open or closed, decided with the reason); non-goals and file scope that stop broad refactors; acceptance criteria with observable checks and test commands (or a note to confirm them); execution rules saying when to stop and ask; and a short list of assumptions and open questions for the user. No vague 'robust/gracefully' wording, no lowercase 'should' requirements, no ALL-CAPS warnings.",
+      "files": [],
+      "assertions": [
+        "Chooses one algorithm and storage approach and gives the reason, rather than listing options",
+        "Specifies concrete limits for free and paid plans, or an open question with a default value",
+        "Specifies the exact 429 response, including Retry-After",
+        "Decides what happens when Redis is unavailable",
+        "Includes non-goals or a file scope that limits the change",
+        "Acceptance criteria are observable (status codes, counts, commands)",
+        "Includes stop-and-ask rules or execution rules for the agent",
+        "Uses MUST/SHOULD/MAY in capitals; no ALL-CAPS shouting"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "sw-review-vague-spec",
+      "prompt": "Can you review this spec before I send it to the contractor?\n\n# Notifications\n\nUsers should get notified about important stuff. Notifications should be fast and reliable and work on mobile and web. We could use Firebase or OneSignal, whichever is easier. Users should be able to turn them off. Handle errors gracefully. Make sure it scales.\n\nDone when notifications work.",
+      "expected_output": "A ranked review rather than a rewrite: first the deferred decisions (Firebase vs OneSignal; what counts as 'important stuff'), then the untestable statements ('fast', 'reliable', 'scales', 'gracefully', 'done when notifications work'), the missing sections (non-goals, edge cases such as opt-out granularity, offline devices, duplicates, quiet hours or time zones, acceptance criteria, verification), and the lowercase 'should' ambiguity. Each issue comes with a concrete rewrite or the question to answer. Offers to produce the full rewritten spec.",
+      "files": [],
+      "assertions": [
+        "Flags the Firebase-or-OneSignal choice as a decision that shouldn't be left to the contractor",
+        "Flags 'important stuff' as undefined and asks for the list of notification types",
+        "Flags fast/reliable/scales/gracefully as unmeasurable, with example rewrites",
+        "Flags 'Done when notifications work' as untestable and proposes acceptance criteria",
+        "Points out missing edge cases (e.g. opt-out granularity, offline devices, duplicates)",
+        "Returns a prioritized review rather than silently rewriting the whole spec"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "sw-bugfix-spec",
+      "prompt": "Turn this into a spec for an agent to fix: customers in Australia are being charged for the wrong day on their monthly subscription renewals, sometimes a day early. Started after we moved the billing cron to UTC. Billing code is in billing/renewals.py, tests in tests/billing/.",
+      "expected_output": "A bug-fix spec using the bug template: observed vs expected, the reproduction conditions (customer time zone ahead of UTC, renewal near midnight local time), the requirement to find and state the root cause before changing code, the fixed behavior stated testably (renewal is due on the customer's local calendar day, with time zone and DST handling named), a regression test that fails before and passes after, a decision about already-affected customers left as an open question or non-goal, scope limited to billing/renewals.py and tests/billing/, and observable acceptance criteria with a test command. Includes edge cases such as month-end (31st) and DST transitions.",
+      "files": [],
+      "assertions": [
+        "Requires the root cause to be identified before the fix",
+        "States the expected behavior in terms of the customer's local date/time zone",
+        "Requires a regression test that fails before the fix and passes after",
+        "Covers time-zone edge cases such as DST and month-end dates",
+        "Limits scope to the named files, with refunds or remediation for past charges as an explicit non-goal or open question",
+        "Acceptance criteria are observable and include a test command"
+      ]
+    }
+  ]
+}
