@@ -1,0 +1,21 @@
+{
+  "name": "atroxabot-skills",
+  "owner": {
+    "name": "Atroxabot"
+  },
+  "metadata": {
+    "description": "A curated set of Agent Skills for Claude from atroxabot.com",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "writing-skills",
+      "description": "Skills for editing and writing prose, starting with a humanizer that removes the patterns that make text read as AI-written",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/humanizer"
+      ]
+    }
+  ]
+}

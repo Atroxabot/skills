@@ -1,0 +1,47 @@
+{
+  "skill_name": "humanizer",
+  "evals": [
+    {
+      "id": 1,
+      "name": "hz-about-page",
+      "prompt": "can you make this sound less like chatgpt wrote it? it's for our clinic's about page\n\nFounded in 2021, Brightline Dental serves as a testament to our unwavering commitment to patient care. Nestled in the heart of Portland's vibrant Pearl District, our state-of-the-art clinic boasts three treatment rooms and a team of dedicated professionals.\n\nOur approach isn't just about teeth — it's about people. We believe in fostering lasting relationships, delivering exceptional outcomes, and creating a welcoming environment for every patient.\n\n- **Experience:** Dr. Maya Okafor brings 14 years of expertise to every appointment.\n- **Technology:** We leverage cutting-edge digital X-rays, reducing radiation by up to 80%.\n- **Comfort:** Our seamless experience ensures you feel at ease from start to finish.\n\nExperts agree that preventive care plays a pivotal role in long-term health. In conclusion, Brightline Dental is more than a clinic — it's a community.",
+      "expected_output": "A rewrite that keeps every real fact (2021, Pearl District Portland, three treatment rooms, Dr. Maya Okafor, 14 years, digital X-rays up to 80% less radiation), removes puffery/negative parallelism/bold-label bullets/vague 'experts agree'/In conclusion, uses plain is/has, doesn't invent new facts, and gives a short change list.",
+      "files": [],
+      "assertions": [
+        "Keeps all six real facts",
+        "Adds no new facts (no invented services, prices, quotes)",
+        "No 'isn't just X, it's Y' or 'more than a clinic' framing",
+        "No bold inline-header bullets",
+        "No 'Experts agree' unsourced attribution",
+        "Short change list included"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "hz-mostly-human-email",
+      "prompt": "does this email sound AI-written? be honest, I wrote it myself but my coworker said it reads like chatgpt\n\nHi Sam,\n\nQuick one before Thursday. I went through the Q3 numbers again last night and I think we've been reading the churn spike wrong. It's mostly the 40 accounts we migrated off the legacy plan in August, not the price change. If you split them out, churn for everyone else is basically flat (2.1% vs 2.3%).\n\nI'd rather not walk into the board meeting arguing about pricing if that's not the real story. Can we grab 20 minutes Wednesday to look at it together? Additionally, I can pull the cohort chart if that helps.\n\nThanks,\nPriya",
+      "expected_output": "An honest diagnosis that the email reads as human (specific numbers, plain voice, real ask), noting at most minor items like 'Additionally,' and not over-flagging; offers small optional tweaks rather than a rewrite; doesn't claim certainty.",
+      "files": [],
+      "assertions": [
+        "Says the email mostly reads human / has few signs",
+        "Mentions 'Additionally' as the main minor tell or similar small item",
+        "Does not rewrite the whole email unprompted",
+        "Does not claim certainty about authorship"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "hz-voice-sample-blog",
+      "prompt": "rewrite the draft so it sounds like me (sample included)\n\nVOICE SAMPLE (an older post of mine):\nI've been building furniture in my garage for nine years now — mostly badly. The first table I made wobbled so hard my wife used it as a metaphor for our mortgage. But here's what nobody tells you: the wobble is the teacher.\n\nDRAFT TO FIX:\nWoodworking is a journey that offers profound lessons in patience and craftsmanship. Over the past year, I embarked on building a walnut bookshelf, a project that tested my skills and showcased the intricate interplay between planning and execution. The process underscored the importance of measuring carefully, choosing quality materials, and embracing mistakes as opportunities for growth. Ultimately, the finished bookshelf stands as a testament to perseverance. It's not just furniture; it's a story.",
+      "expected_output": "A rewrite in the sample's voice (self-deprecating, concrete, allows em dashes since the sample uses them), keeping the true facts (past year, walnut bookshelf) without inventing new incidents, dimensions, or dialogue; removes journey/profound/showcased/interplay/underscored/testament/'not just furniture'; uses placeholders or questions for missing specifics.",
+      "files": [],
+      "assertions": [
+        "Keeps walnut bookshelf and past-year facts",
+        "Does not invent specific incidents, measurements, wife quotes or other new facts",
+        "Removes 'testament', 'interplay', 'underscored', 'not just X, it's Y'",
+        "Matches the sample's casual, self-deprecating voice",
+        "Asks for or marks missing specifics"
+      ]
+    }
+  ]
+}
