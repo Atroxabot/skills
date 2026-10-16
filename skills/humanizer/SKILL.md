@@ -46,8 +46,8 @@ These must survive the edit.
 
 Go through the text against the catalog, in this order of importance:
 
-1. **Content** (catalog section 1): inflated significance, coverage-bragging, trailing "-ing" analysis, promotional tone, vague association, vague attribution, the "despite challenges" formula, hedging disclaimers, sentences that only name a feeling. These are the real problems.
-2. **Language** (section 2): AI vocabulary density, avoiding "is"/"has," negative parallelisms, rule-of-three lists, elegant variation, monotone rhythm, false ranges, stacked hedges, stock metaphors.
+1. **Content** (catalog section 1): inflated significance, coverage-bragging, trailing "-ing" analysis, promotional tone, vague association, vague attribution, the "despite challenges" formula, hedging disclaimers, sentences that only name a feeling, and no stance at all (9.7). These are the real problems.
+2. **Language** (section 2): AI vocabulary density, avoiding "is"/"has," negative parallelisms, rule-of-three lists, elegant variation, monotone rhythm, false ranges, stacked hedges, stock metaphors, predictable openings.
 3. **Formatting** (section 3): Title Case headings, bold everywhere, `**Label:**` bullets, emoji bullets, needless tables, em-dash habits, colon drumrolls, markdown where it won't render, note-speak with arrows.
 4. **Residue** (sections 4 and 6): "Certainly!", "I hope this helps," unfilled placeholders, "It's important to note," "In conclusion."
 5. **Social patterns** (section 8), if it's a post: stock lines, broetry, engagement bait.
@@ -74,7 +74,7 @@ Work sentence by sentence, fixing the cause:
 | Trailing "-ing" analysis | Delete the clause. A real interpretation becomes its own sentence. |
 | Promotional adjectives | Replace with what the thing has, does or costs. |
 | Sentences that name a feeling ("feels like home") | Say what it has or does. If the line would fit anyone's text, cut it. |
-| Vague attribution ("experts say") | Name the source the user gave, own the opinion, or cut. Never invent a source. |
+| Vague attribution ("experts say," "as we all know") | Name the source the user gave, own the opinion, or cut. Never invent a source. |
 | "Serves as," "boasts," "features" | Use "is" and "has." |
 | "It's not X, it's Y" and its family | Say what it is. Keep a contrast only if readers really believe X, and name that belief. |
 | Rule-of-three lists | Keep the item that matters, or make the items concrete and uneven. |
@@ -82,6 +82,7 @@ Work sentence by sentence, fixing the cause:
 | Stock metaphors (north star, bedrock, "harness the power of") | Use the plain word, or the concrete thing it points at. |
 | False ranges ("everything from X to Y") | List what's really there, or name the one that matters. |
 | Stacked hedges ("could potentially") | Keep one hedge where the doubt is real, or none. |
+| Predictable openings ("This... This...", "Furthermore,") | Start with the subject or the action. Open the piece on its first specific point. |
 | Monotone rhythm | Vary sentence length on purpose. Allow a fragment, a long sentence, a question, a colon. |
 | Bold, bold-label bullets, emoji bullets | Use prose, or a plain list. Emphasis comes from the sentence. |
 | Colon drumrolls ("The secret: ...") | Write the sentence without the setup. |
@@ -89,6 +90,8 @@ Work sentence by sentence, fixing the cause:
 | Chatbot residue, summaries, disclaimers | Delete. |
 
 If the draft has almost no real content (pure filler around one or two facts), say so plainly. A short, true draft plus two or three questions that would unlock the real story is better than a lively version built on invented experiences. In testing, a version without this skill invented a whole year of mishaps for the author. It read well, and it was fiction.
+
+The same goes for a draft that never says what the author thinks (catalog 9.7). Ask which side they're on, where they're unsure, the best objection they've heard, and whether they have an example of their own. Don't supply the view yourself.
 
 When removing vagueness leaves a hole (the sentence said "a pivotal moment" and you don't know why it mattered), don't fill it with an invented detail. Ask the user, or leave a clearly marked `[what changed after this?]` placeholder. Use at most two or three placeholders. If more are needed, cut the sentences instead and list your questions.
 
@@ -101,7 +104,7 @@ Over-polished text is its own tell, and so is a new uniform habit. A 2026 public
 - **Flattening everything to short sentences.** Short isn't the goal; variety is.
 - **Cutting real contrast or real lists.** If a list genuinely has three items, it can stay.
 - **"Fixing" things that aren't signs.** Perfect grammar, formality, mixed registers and plain transition words are not evidence of AI (catalog section 7).
-- **Faking human cues.** Don't add "I", feelings, family mentions or an anecdote to make text seem human. Readers do take these as signs of a human author, which is exactly why adding them misleads. An opinion or reaction the author actually holds is fine; a fact they didn't give is not (catalog 9.6).
+- **Faking human cues.** Don't add "I", feelings, family mentions, an anecdote, hedges or a counterargument to make text seem human. Readers do take these as signs of a human author, which is exactly why adding them misleads. An opinion or reaction the author actually holds is fine; a fact they didn't give is not (catalog 9.6).
 
 ### 5. Check
 
