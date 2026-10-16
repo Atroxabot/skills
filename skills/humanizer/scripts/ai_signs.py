@@ -49,6 +49,9 @@ PATTERNS = [
     ("content", "1.8", "hedging disclaimer",
      r"\b(while )?specific details are (limited|scarce)\b|\bnot widely (documented|available|disclosed)\b|\bbased on (the )?available information\b|\bshould be (treated|seen|read|understood) as\b[^.]{0,80}\brather than\b|\bdoes not by itself (establish|prove|mean)\b|\bmaintains a low profile\b",
      "delete; state what you know or leave it out"),
+    ("content", "1.9", "names a feeling",
+     r"\b(feels?|felt) like (home|family)\b|\b(comes?|came|coming) (to life|alive)\b|\b(truly|something) special\b|\bwhere \w+ meets \w+\b",
+     "say what it has or does; would the line fit anyone's text?", "info"),
 
     # 2. Language
     ("parallelism", "2.3", "not just X, but Y",
@@ -72,10 +75,24 @@ PATTERNS = [
     ("copula", "2.2", "avoiding is/has",
      r"\b(serves|served|stands|stood|functions|functioned|operates) as (a|an|the)\b|\b(represents|marks|marked|signals) (a|an) (\w+ )?(shift|moment|milestone|turning point|departure|step)\b",
      "use is / has"),
+    ("language", "2.7", "false range",
+     r"\beverything from\b[^.!?\n]{1,40}\bto\b",
+     "list what's really there, or name the one that matters", "info"),
+    ("language", "2.8", "stacked hedge",
+     r"\b(could|may|might|can) (potentially|possibly|perhaps|conceivably)\b|\b(potentially|possibly|perhaps) (could|may|might)\b|\bit (could|can|may|might) be argued that\b[^.!?\n]{0,80}\b(may|might|could|perhaps|possibly)\b",
+     "keep one hedge where the doubt is real, or none"),
+    ("language", "2.9", "stock metaphor",
+     r"\bnorth star\b|\bflywheel\b|\bbedrock\b|\bnexus\b|\bparadigm\b|\bharness(es|ed|ing)? the (power|potential)\b|\bthe fabric of\b|\bthe heartbeat of\b|\bspeaks? for (itself|themselves)\b",
+     "use the plain word, or the concrete thing it points at", "info"),
+
+    # 3. Style
+    ("rhythm", "3.6", "colon drumroll",
+     r"\bthe (secret|answer|key|truth|catch|kicker|twist|trick|best part|real (lesson|story|secret|problem))( is| was)?:|\b(in )?(one|two|three) words?:|\bin a word:",
+     "write the sentence without the setup", "info"),
 
     # 4. Chatbot residue
     ("residue", "4.1", "talking to the user",
-     r"\b(certainly|of course|absolutely)!|\bhere(?:'s| is) (a|an|the) (revised|rewritten|more|polished|updated|draft)\b|\bi hope this helps\b|\bwould you like (me )?to\b|\blet me know if\b|\byou'?re absolutely right\b|\bin this (section|article|post),? (we|i) will\b",
+     r"\b(certainly|of course|absolutely)!|\bhere(?:'s| is) (a|an|the) (revised|rewritten|more|polished|updated|draft)\b|\bi hope this helps\b|\bwould you like (me )?to\b|\blet me know if\b|\bgreat question!|\byou'?re absolutely right\b|\bin this (section|article|post),? (we|i) will\b",
      "delete; it was meant for the person prompting"),
     ("residue", "4.2", "placeholder",
      r"\[(your|insert|add|company|name)[^\]]{0,40}\]|\((if available|insert [^)]*)\)|\b20\d\d-xx-xx\b",
@@ -94,6 +111,10 @@ PATTERNS = [
      "delete"),
 
     # 9. Newer structural tells (2025-2026 research)
+    # Case-sensitive inside (?-i:...): a run of three or more capitalized one- or two-word sentences.
+    ("structure", "9.2", "stacked short fragments",
+     r"(?-i:(?:^|(?<=[.!?]\s))(?:[A-Z][a-z']+(?: [a-z']+)?[.!]\s+){2,}[A-Z][a-z']+(?: [a-z']+)?[.!])",
+     "a slogan beat; keep it only if the author writes that way", "info"),
     ("structure", "9.1", "'matters' framing",
      r"\b(this|that|it) matters\b|\bwhy (this|it|that|\w+) matters\b|\bmatters because\b|\bis more than (just )?(a|an) [^.!?\n]{1,40}[;,:\u2014-]\s*it\b|\bis not simply\b",
      "delete the frame; let the fact carry the weight"),
@@ -261,6 +282,17 @@ def scan(text, exclude=()):
             if len(words) >= 2 and all(w[0].isupper() for w in words):
                 findings.append(Finding("formatting", "3.1", "Title Case heading", m.group(1)[:50],
                                         "use sentence case", _line_of(text, m.start())))
+        # 3.8 note-speak. Code and HTML comments are blanked first, keeping positions, since arrows belong there.
+        prose = re.sub(r"```.*?```|`[^`\n]*`|<!--.*?-->",
+                       lambda m: re.sub(r"[^\n]", " ", m.group(0)), text, flags=re.DOTALL)
+        arrows = list(re.finditer(r"[→⇒⟶↑↓]|->|=>", prose))
+        if arrows:
+            line = _line_of(text, arrows[0].start())
+            findings.append(Finding(
+                "formatting", "3.8", "note-speak arrows",
+                f"{len(arrows)} arrow(s), first in: {text.splitlines()[line - 1].strip()[:40]}",
+                "write whole sentences; keep arrows for routes, diagrams or conversions",
+                line, "warn" if len(arrows) >= 2 else "info"))
 
     findings.sort(key=lambda f: (f.line, f.section))
     return findings

@@ -4,6 +4,7 @@
 > - the patterns logged by Wikipedia's WikiProject AI Cleanup in [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing)
 > - studies of model style from 2023 to 2026, named where they're used (mainly section 9)
 > - 2026 research on social posts (section 8)
+> - Cursor's [unslop](https://github.com/cursor/plugins/blob/main/pstack/skills/unslop/SKILL.md) skill, which suggested the swap test (1.9), false ranges (2.7), stacked hedges (2.8), stock metaphors (2.9), colon drumrolls (3.6) and note-speak (3.8)
 >
 > It's written for editing, not detection, so every sign comes with a fix. It's also incomplete by nature: each model generation drops some habits and picks up new ones, and no sign proves who wrote a text. Treat a hit as a reason to reread the sentence, not as a verdict. Last revised October 2026.
 
@@ -164,6 +165,22 @@ These are common in chatbots that browse the web, especially by mid-2026. When t
 
 **Fix:** delete. Either you know the fact (state it) or you don't (leave it out, or ask).
 
+### 1.9 Sentences that name a feeling
+**Watch for:**
+- feels like home / feels like family
+- comes to life / where ideas come alive
+- something special / truly special
+- where X meets Y ("where tradition meets innovation")
+- "a team that truly cares," "an experience you'll never forget," "made with love"
+
+The sentence tells the reader how to feel about the subject and nothing about the subject itself. It's the whole-sentence version of promotional tone (1.4): there's no adjective to delete, only a mood.
+
+> Our kitchen is a place *where tradition meets innovation* and every dish *feels like home*.
+
+**The swap test:** could the sentence appear unchanged in someone else's text, on a rival's About page or in another person's bio? If it could, it says nothing about this one.
+
+**Fix:** say what the thing has or does, the fact only this text could contain ("We roll the pasta by hand every morning"). If there's no such fact, cut the sentence or ask for one.
+
 ---
 
 ## 2. Language and grammar
@@ -231,6 +248,31 @@ Sentences all land in the same length band (about 8–20 words), with the same s
 
 Read it aloud. If it has a metronome beat, break it.
 
+### 2.7 False ranges
+"From X to Y" where X and Y aren't two ends of anything. A real range has a scale between its ends: from 9 to 5, from beginners to professionals. A false one names two items and hints at everything in between: "everything from weddings to product launches," "from the boardroom to the kitchen table."
+
+**Fix:** list what's actually there ("We cater weddings and product launches"), or name the one that matters.
+
+### 2.8 Stacked hedges
+**Watch for:**
+- could potentially, may possibly, might perhaps
+- "it could be argued that... may"
+- "in some cases, this can sometimes"
+
+One hedge is human (5.1). Two or three on the same claim leave it saying nothing, and models stack them whenever they want to sound careful.
+
+**Fix:** keep one hedge where the doubt is real ("this may raise dues"), or state the claim plainly if you know it.
+
+### 2.9 Stock metaphors
+**Watch for:**
+- north star, flywheel, bedrock, nexus, paradigm (shift)
+- "harness the power of," "woven into the fabric of," "the heartbeat of"
+- things acting like people: "the data tells a story," "the numbers speak for themselves"
+
+These sound strategic or vivid, but each stands in for a plain word: a north star is a main goal, bedrock is a basis, to harness is to use. A metaphor the author made up for this text, specific enough that it couldn't go anywhere else, is a different thing. Keep those.
+
+**Fix:** use the plain word ("our main goal"), or say the concrete thing the metaphor points at.
+
 ---
 
 ## 3. Style and formatting
@@ -242,7 +284,7 @@ Chatbots capitalize every main word in headings. **Fix:** use sentence case unle
 Chatbots bold key phrases mechanically, "key takeaways" style, often every instance of a term. **Fix:** remove almost all bold. Emphasis should come from the sentence.
 
 ### 3.3 Inline-header lists
-`- **Header:** description` bullets, often in threes, where prose would read better. **Fix:** write a paragraph, or a plain list without bold labels.
+`- **Header:** description` bullets, often in threes, where prose would read better. The clearest case is a label that its own line just repeats ("**Performance:** Performance improved by..."). **Fix:** write a paragraph, or a plain list without bold labels. In reference material (a menu, a spec sheet, an FAQ), a bold lead-in that names the item and is followed by new information can stay.
 
 ### 3.4 Emoji as formatting
 Emoji placed before headings or bullets (🚀 ✅ 💡). **Fix:** remove them. Use at most one emoji, and only where it carries meaning.
@@ -252,10 +294,14 @@ Small tables that hold two or three facts. **Fix:** use a sentence.
 
 ### 3.6 Punctuation
 - **Em dashes (—):** a historical sign (2022–September 2026). Older models overused them, usually with spaces around them and in punched-up, sales-like spots where a person would use a comma, colon or parentheses. Wikipedia cites a July 2026 study in which Claude was the only current model above professional writers. Graphite's October 2026 data shows Claude Opus 5.5 and Gemini 3.1 Pro now use almost none (about 0.015 per 1,000 words, against about 3 for humans), while GPT-5-era models still use about 7. So too many dashes and none at all are both signals. Fix the formulaic ones. Don't strip every dash and replace it with a period: that creates the monotone rhythm in 2.6. If the author's own writing uses dashes, keep them.
+- **Colons as a drumroll:** a colon is fine before a list, an example or a quote, and it's one of the ways to vary rhythm (2.6). The tell is a colon that stages a reveal: "The secret: consistency." "One word: trust." Write the sentence without the setup ("What worked was showing up every week").
 - **Curly quotes and apostrophes:** typical of ChatGPT and DeepSeek output, and often mixed with straight quotes in one text. They're weak on their own, since Word and macOS produce them too.
 
 ### 3.7 Markdown in places that don't render it
 Asterisks, `#` headings and `[text](url)` links pasted into LinkedIn, X, email or a CMS. **Fix:** convert to plain text that suits the destination.
+
+### 3.8 Compressed note-speak
+Arrows, symbols and verbless fragments in text meant to be read as a message: "Workdays → Saturdays," "water bill ↑ 30%," "new lock, code at desk." Models write like this when told to be brief, and it turns the reader into a decoder. **Fix:** write whole sentences with their verbs and articles ("Workdays have moved to Saturdays"). Arrows are fine where they mean something concrete, such as a route, a diagram or a conversion. Shorthand in personal notes, or in the author's own texting style, isn't a sign either.
 
 ---
 
@@ -269,6 +315,7 @@ Asterisks, `#` headings and `[text](url)` links pasted into LinkedIn, X, email o
 - "I hope this helps"
 - "Would you like me to..."
 - "Let me know if..."
+- "Great question!"
 - "You're absolutely right"
 - "In this section, we will discuss..."
 
@@ -363,7 +410,7 @@ Each runs about 90–580× the human rate in 2026 models. They announce importan
 **Fix:** delete the frame and let the fact carry the weight.
 
 ### 9.2 Aphoristic one-line closers
-A paragraph or post that ends on a short, quotable, deep-sounding line ("And that changes everything." "Clarity is kindness." "That's the real lesson."). In the blind test, humanizer rewrites *increased* these, from 38 to 61. They're the easiest tic to add while removing others.
+A paragraph or post that ends on a short, quotable, deep-sounding line ("And that changes everything." "Clarity is kindness." "That's the real lesson."). In the blind test, humanizer rewrites *increased* these, from 38 to 61. They're the easiest tic to add while removing others. The same move shows up mid-paragraph too, as a slogan ("Ship it or kill it.") or a stack of one-word sentences ("Simple. Fast. Done.").
 
 **Fix:** end on the last concrete point. Keep a closing line only if it adds information.
 
