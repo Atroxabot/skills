@@ -17,6 +17,7 @@ For background on skills:
 | [humanizer](./skills/humanizer) | `writing-skills` | Edits text so it reads like a specific person wrote it. It finds the patterns that mark text as AI-written and fixes their causes (vagueness, puffery) instead of swapping synonyms, keeps the author's facts and voice, and never invents details. Includes a pattern scanner script. |
 | [spec-writer](./skills/spec-writer) | `engineering-skills` | Writes and hardens implementation specs that an AI agent or engineer can execute without guessing: decisions instead of options, numbered testable requirements, non-goals and file scope, edge cases, acceptance criteria with verification commands, and rules for when to stop and ask. Includes a linter for vague words, hedges and deferred decisions. |
 | [email-dns-auth](./skills/email-dns-auth) | `engineering-skills` | Checks and fixes a domain's email authentication (SPF, DKIM, DMARC, MTA-STS, BIMI, reverse DNS) when mail goes to spam, bounces or gets spoofed. Includes a live DNS checker, a message-header analyzer and a DMARC report summarizer, and gives copy-paste records with a safe rollout order. |
+| [webapp-architecture](./skills/webapp-architecture) | `engineering-skills` | Sets the stack, structure and code standards for React web apps on the latest React Router: server-side rendering by default, slow data on authenticated panels streamed into layout-matched skeletons, auth in middleware, a small global stylesheet with CSS Modules for every component and page, reusable components, strict TypeScript, and tests that catch real bugs. Includes an audit script. About how the app is built, not how it looks. |
 | [invoice-extract](./skills/invoice-extract) | `business-skills` | Extracts invoices, receipts and credit notes (PDF, scan, e-invoice XML) into JSON or CSV, then validates them with a script: arithmetic and tax, dates and terms, IBAN and tax ID checks, duplicates, and changed bank details. Flags invoices that shouldn't be paid as-is. |
 
 Each skill is self-contained in its own folder, with a `SKILL.md` holding the instructions and metadata Claude uses, plus any `references/` and `scripts/` it needs.
@@ -54,7 +55,7 @@ To use a single skill without a plugin, copy its folder into your skills directo
 cp -r skills/humanizer ~/.claude/skills/
 ```
 
-Once installed, just ask, for example "humanize this", "write a spec for Claude Code to add rate limiting", "why do our emails go to spam?" or "extract these invoices to CSV".
+Once installed, just ask, for example "humanize this", "write a spec for Claude Code to add rate limiting", "why do our emails go to spam?", "add a dashboard page to our React Router app" or "extract these invoices to CSV".
 
 ## Claude.ai
 

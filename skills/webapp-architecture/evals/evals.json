@@ -1,0 +1,70 @@
+{
+  "skill_name": "webapp-architecture",
+  "evals": [
+    {
+      "id": 1,
+      "name": "wa-dashboard-streaming",
+      "prompt": "Add a project overview page to our app at /projects/:projectId. It's behind login. It shows the project name and members (fast, from our Postgres), a usage chart (slow aggregate query, 2-3s) and a recent activity feed from a third-party API that's sometimes slow or down. We're on React Router framework mode.",
+      "expected_output": "Checks the installed React Router version against the latest first. A route module with a loader that starts all queries together, awaits only the project and members (throwing a 404 when missing), and returns the usage and activity promises unawaited. Auth comes from middleware on the authenticated layout via a typed context, with authorization checked in the data function. Each slow panel sits in its own Suspense boundary with an Await (or React.use) and an error element, so a failing activity API only breaks its own panel. The skeletons reuse the panels' layout classes, appear after a short delay, respect reduced motion and are aria-hidden. Components get colocated .module.css files and no global CSS is added. Tests cover the loader's 404 and authorization paths and the panel's error state, with no renders-without-crashing or snapshot tests.",
+      "files": [],
+      "assertions": [
+        "Checks or states the latest React Router version instead of assuming one",
+        "Loader starts all queries together and awaits only the critical data",
+        "Slow data is returned as promises and rendered inside Suspense with Await or React.use",
+        "Each slow panel has its own Suspense boundary and its own error handling",
+        "Authentication is handled by middleware or the authenticated layout, not copied into the loader",
+        "Skeletons match the panel layout and avoid flashing for fast responses",
+        "Styles go in .module.css files colocated with the components",
+        "Tests target loader rules and error states; no snapshot or render-only tests"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "wa-review-legacy-component",
+      "prompt": "Can you review this before I merge?\n\n```tsx\nimport { useEffect, useState } from 'react';\nimport { useParams, Link } from 'react-router-dom';\nimport '../styles/invoices.css';\n\nexport default function Invoices() {\n  const { orgId } = useParams();\n  const [data, setData] = useState<any>(null);\n  useEffect(() => {\n    fetch(`/api/orgs/${orgId}/invoices`).then(r => r.json()).then(setData);\n  }, [orgId]);\n  if (!data) return <div className=\"spinner\" />;\n  return (\n    <div className=\"invoices-page\">\n      {data.items.map((inv: any) => (\n        <Link to={'/orgs/' + orgId + '/invoices/' + inv.id} className=\"invoice-row\">{inv.number} {inv.total}</Link>\n      ))}\n    </div>\n  );\n}\n```\n\n```tsx\n// Invoices.test.tsx\nit('renders without crashing', () => { render(<Invoices />); });\nit('matches snapshot', () => { expect(render(<Invoices />).container).toMatchSnapshot(); });\n```",
+      "expected_output": "A ranked review: the useEffect fetch should become a loader, so the page server-renders without a full-page spinner, gets parallel loading and revalidation, and no longer fails silently on errors (there is no error handling at all). react-router-dom imports must move to react-router, and the app should be on the latest major. The any types should be replaced with real types parsed at the boundary, the missing key on mapped Links fixed, and the link built with href() instead of string concatenation. The global stylesheet import should become a .module.css file. Asks whether authorization for orgId is checked on the server. Says both tests are filler and should be deleted, and proposes useful ones (the loader denies another org's invoices; an empty list shows an empty state). Gives concrete fixes.",
+      "files": [],
+      "assertions": [
+        "Flags fetching in useEffect and proposes a loader instead",
+        "Flags react-router-dom and the version",
+        "Flags the any types and the missing key",
+        "Flags the global CSS import and proposes a .module.css file",
+        "Raises missing error and empty states, and the full-page spinner",
+        "Raises server-side authorization for orgId",
+        "Calls both tests pointless and proposes behavior-based replacements",
+        "Orders findings by impact rather than file order"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "wa-write-tests-no-filler",
+      "prompt": "Write tests for our settings page. It has a route with a loader that returns the current user's profile, an action that updates display name (1-50 chars) and email (must be unique, returns a field error if taken), and a ProfileForm component that shows field errors and disables the save button while submitting. There are also Avatar, SettingsNav and PageHeader components on the page.",
+      "expected_output": "Server tests that call the action directly: validation failures for an empty name and a 51-character name, duplicate email returning a field error with status 400 and no database change, and a successful update with a redirect or success state. A component test using createRoutesStub where ProfileForm shows the server's field error tied to its input and disables the button while submitting. Explains that Avatar, SettingsNav and PageHeader get no dedicated tests because they have no logic, and that the loader is only tested if it does more than read the session user. Uses role and label queries. No snapshots, no render-only tests, no class-name assertions.",
+      "files": [],
+      "assertions": [
+        "Tests the action's validation boundaries (empty, too long) and the duplicate-email path",
+        "Checks database state or the returned outcome, not internal calls",
+        "Uses createRoutesStub or an equivalent router setup for the form component",
+        "Tests the pending/disabled state and field error association",
+        "Explicitly skips tests for Avatar, SettingsNav and PageHeader, with the reason",
+        "Uses accessible queries (getByRole, getByLabelText)",
+        "Contains no snapshot, render-only or class-name assertions"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "wa-upgrade-from-v6",
+      "prompt": "Our app is on react-router-dom 6.22 with createBrowserRouter and a big Vite SPA. Management wants SSR for the marketing pages and the dashboard to feel faster. How do we get there?",
+      "expected_output": "Checks the latest React Router version first (8.x or later). Lays out an ordered path: enable the v7 future flags on v6, upgrade to the latest v7 and swap react-router-dom imports for react-router, enable the v8 flags one at a time, meet the v8 baselines (Node 22.22+, React 19.2.7+, Vite 7+, ESM), upgrade to v8, then adopt framework mode route by route with the Vite plugin and routes.ts. Prerender the marketing pages, server-render the dashboard with middleware auth and streamed slow panels with skeletons. Explains why each step is separate (each one testable). Doesn't recommend ssr: false or a second data-fetching library.",
+      "files": [],
+      "assertions": [
+        "Checks or names the current latest React Router major",
+        "Gives an ordered, incremental upgrade path through v7 to the latest",
+        "Mentions removing react-router-dom",
+        "States the v8 baseline requirements",
+        "Recommends prerendering or SSR for marketing pages",
+        "Recommends streaming with skeletons for slow dashboard data"
+      ]
+    }
+  ]
+}
