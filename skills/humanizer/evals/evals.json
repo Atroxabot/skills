@@ -57,6 +57,20 @@
         "No 'The secret:' style closer",
         "Invents no spring details (member counts, harvests, names) and asks or marks a placeholder if it keeps that paragraph"
       ]
+    },
+    {
+      "id": 5,
+      "name": "hz-no-stance-post",
+      "prompt": "make this blog post sound less like AI, I'm a team lead at a 30-person design studio\n\nIn an era of constant connectivity, the debate over remote work has never been more relevant.\n\nIt is widely recognized that remote work offers flexibility. This allows employees to manage their time. This reduces commuting costs. This can also improve focus. Furthermore, companies save on office space. Moreover, hiring can draw on a wider pool.\n\nOn the other hand, office work supports collaboration. Both have their pros and cons, and there is no one-size-fits-all answer. Ultimately, the right choice depends on your specific needs.",
+      "expected_output": "Says the draft has no stance and asks the author for theirs (which way the studio went or leans and why, where they're unsure, an objection, an example from their own team) instead of inventing one. Any revision cuts the generic opener, 'It is widely recognized', the This/This/This run and the Furthermore/Moreover openers and the both-sides ending, and adds no opinion, hedge, counterargument or studio anecdote the author didn't give.",
+      "files": [],
+      "assertions": [
+        "Points out that the post never says what the author thinks",
+        "Asks the author for their view, doubts, an objection or an example of their own",
+        "Does not invent an opinion, a counterargument or a story about the studio or its team",
+        "Does not add hedges such as 'appears', 'suggests' or 'might' to fake hesitation",
+        "Any revision drops 'In an era of', 'It is widely recognized', the repeated 'This' openers, 'Furthermore'/'Moreover' and the 'depends on your needs' ending"
+      ]
     }
   ]
 }

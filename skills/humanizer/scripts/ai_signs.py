@@ -43,6 +43,9 @@ PATTERNS = [
     ("content", "1.6", "vague attribution",
      r"\b(experts|observers|critics|researchers|analysts|scholars) (argue|agree|say|suggest|believe|warn|recommend|note|have (cited|noted))\b|\bindustry reports\b|\bstudies (show|suggest)\b|\bdescribed in scholarship\b|\bseveral (sources|publications)\b",
      "name the source, own the claim, or cut it"),
+    ("content", "1.6", "appeal to shared knowledge",
+     r"\bit(?:'s| is) (widely|generally|universally) (recognized|acknowledged|accepted|known)\b|\bas we all know\b|\bit(?:'s| is) no secret\b|\bit goes without saying\b|\beveryone knows\b",
+     "name the source, own the claim, or cut it"),
     ("content", "1.7", "challenges formula",
      r"\bdespite (its|these|the) [^.]{0,60}\bchallenges\b|\bfaces? (several|many|numerous) challenges\b|\bfuture (outlook|prospects)\b",
      "name the real problem or end on the last substantive point"),
@@ -84,6 +87,9 @@ PATTERNS = [
     ("language", "2.9", "stock metaphor",
      r"\bnorth star\b|\bflywheel\b|\bbedrock\b|\bnexus\b|\bparadigm\b|\bharness(es|ed|ing)? the (power|potential)\b|\bthe fabric of\b|\bthe heartbeat of\b|\bspeaks? for (itself|themselves)\b",
      "use the plain word, or the concrete thing it points at", "info"),
+    ("language", "2.10", "generic opening",
+     r"^[ \t]*(in an? (era|age|world) (of|where)\b|in a world where\b|imagine a world\b|have you ever wondered\b|[\w ]{1,30}\b(has|have) become (an )?increasingly\b)",
+     "open on the first specific point", "info"),
 
     # 3. Style
     ("rhythm", "3.6", "colon drumroll",
@@ -115,6 +121,9 @@ PATTERNS = [
     ("structure", "9.2", "stacked short fragments",
      r"(?-i:(?:^|(?<=[.!?]\s))(?:[A-Z][a-z']+(?: [a-z']+)?[.!]\s+){2,}[A-Z][a-z']+(?: [a-z']+)?[.!])",
      "a slogan beat; keep it only if the author writes that way", "info"),
+    ("structure", "9.7", "no stance",
+     r"\bdepends on your (specific |individual |unique |own )?(needs|goals|situation|circumstances|preferences)\b|\bthere(?:'s| is) no one[- ]size[- ]fits[- ]all\b|\bboth (have|offer|come with) (their )?(own )?(pros and cons|advantages and disadvantages|strengths and weaknesses)\b",
+     "if the author has a view, ask for it and say it", "info"),
     ("structure", "9.1", "'matters' framing",
      r"\b(this|that|it) matters\b|\bwhy (this|it|that|\w+) matters\b|\bmatters because\b|\bis more than (just )?(a|an) [^.!?\n]{1,40}[;,:\u2014-]\s*it\b|\bis not simply\b",
      "delete the frame; let the fact carry the weight"),
@@ -245,6 +254,33 @@ def scan(text, exclude=()):
                 f"{len(triads)} three-item list(s), first: '{triads[0].group(0)[:40]}'",
                 "keep the one that matters, or make them concrete and uneven",
                 _line_of(text, triads[0].start()), "warn" if len(triads) >= 2 else "info"))
+
+    if "language" not in exclude:
+        # 2.10 predictable openings: runs of sentences that start with the same word, and connector openers.
+        starts, pos = [], 0
+        for s in sentences(text):
+            at = max(text.find(s, pos), 0)
+            pos = at + len(s)
+            # List items often share a verb, and runs of "I" are ordinary in personal writing.
+            m = None if re.match(r"([-*•]|\d+[.)])\s", s) else re.match(r"[\W_]*([A-Za-z']+)", s)
+            starts.append((s, m.group(1).lower() if m else None, at))
+        run_word, run_len, run_at = None, 0, 0
+        for _, word, at in starts + [("", None, 0)]:
+            if word and word == run_word:
+                run_len += 1
+                continue
+            if run_len >= 3 and run_word != "i":
+                findings.append(Finding(
+                    "language", "2.10", "repeated opening", f"{run_len} sentences in a row start with '{run_word}'",
+                    "start with the subject or the action; keep repetition that's deliberate",
+                    _line_of(text, run_at), "info"))
+            run_word, run_len, run_at = word, 1, at
+        connectors = [at for s, _, at in starts
+                      if re.match(r"[\W_]*(additionally|furthermore|moreover|in addition|notably|importantly),", s, re.I)]
+        if len(connectors) >= 3:
+            findings.append(Finding(
+                "language", "2.10", "connector openers", f"{len(connectors)} sentences open with Additionally, Furthermore and the like",
+                "drop the connectors the logic doesn't need", _line_of(text, connectors[0])))
 
     if "rhythm" not in exclude:
         r = rhythm(text)

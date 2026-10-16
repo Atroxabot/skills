@@ -138,6 +138,7 @@ Models drift into travel-brochure or press-release voice even when asked for neu
 - described in scholarship
 - several sources (when there are one or two)
 - "such as" before a list that is actually complete
+- appeals to shared knowledge: it is widely recognized, as we all know, it's no secret that, it goes without saying
 
 **Fix:** name the source and what it said, or own the claim as the author's view. If neither is possible, cut it. Never invent a source to fill the gap.
 
@@ -246,7 +247,7 @@ Sentences all land in the same length band (about 8–20 words), with the same s
 - a colon
 - paragraphs of different sizes
 
-Read it aloud. If it has a metronome beat, break it.
+Read it aloud. If it has a metronome beat, break it. Don't alternate on a schedule either (short, long, short, long). Guides to beating AI detectors often prescribe exactly that, and a pattern is still a pattern.
 
 ### 2.7 False ranges
 "From X to Y" where X and Y aren't two ends of anything. A real range has a scale between its ends: from 9 to 5, from beginners to professionals. A false one names two items and hints at everything in between: "everything from weddings to product launches," "from the boardroom to the kitchen table."
@@ -263,6 +264,8 @@ One hedge is human (5.1). Two or three on the same claim leave it saying nothing
 
 **Fix:** keep one hedge where the doubt is real ("this may raise dues"), or state the claim plainly if you know it.
 
+The opposite advice, common in guides to beating AI detectors, is to sprinkle "appears," "suggests" and "might" over flat claims so the text seems to hesitate. That swaps one fault for another. Match each claim's certainty to what the author actually knows: sure where they're sure, hedged where they aren't, ideally with the reason for the doubt. See 9.7.
+
 ### 2.9 Stock metaphors
 **Watch for:**
 - north star, flywheel, bedrock, nexus, paradigm (shift)
@@ -272,6 +275,16 @@ One hedge is human (5.1). Two or three on the same claim leave it saying nothing
 These sound strategic or vivid, but each stands in for a plain word: a north star is a main goal, bedrock is a basis, to harness is to use. A metaphor the author made up for this text, specific enough that it couldn't go anywhere else, is a different thing. Keep those.
 
 **Fix:** use the plain word ("our main goal"), or say the concrete thing the metaphor points at.
+
+### 2.10 Predictable openings
+**Watch for:**
+- a run of sentences or paragraphs that start the same way: "This...", "This...", "This..."
+- formal connectors at the front of sentence after sentence: Additionally, Furthermore, Moreover, In addition, Notably
+- a first line anyone could have written: "In an era of...", "In a world where...", "X has become increasingly important," "Have you ever wondered...?"
+
+One "Furthermore" is fine (section 7). A paragraph where every sentence opens with a connector or with "This" reads as assembled rather than written, and a generic first line fails the swap test (1.9) before the reader reaches anything real.
+
+**Fix:** start sentences with their subject or the action ("The council voted..."), drop connectors the logic doesn't need, and open the piece on its first specific point. Repetition the author uses on purpose, for rhythm or emphasis, can stay.
 
 ---
 
@@ -394,7 +407,7 @@ These come from 2026 research on how LinkedIn and X posts read and rank. They're
 
 ## 9. Newer structural tells
 
-These come from 2025–2026 studies. The main ones are Graphite's AI Tells corpus (2026), Reinhart et al. (PNAS 2025), Antislop (ICLR 2026), and a 2026 public blind test of a Wikipedia-based humanizer.
+These come from 2025–2026 studies. The main ones are Graphite's AI Tells corpus (2026), Reinhart et al. (PNAS 2025), Antislop (ICLR 2026), Jiang and Hyland's two 2025 studies of ChatGPT essays, and a 2026 public blind test of a Wikipedia-based humanizer.
 
 ### 9.1 "Matters" framing
 **Watch for:**
@@ -433,3 +446,13 @@ Compared with human writers, models use fewer exclamation marks, parenthetical a
 Readers wrongly treat first-person pronouns, contractions, family mentions and anecdotes as proof of a human author (Jakesch et al., PNAS 2023). Adding "I", feelings or a story to seem human misleads readers. When it invents facts, it is fabrication.
 
 **Fix:** keep the author's real experiences, opinions and reactions. A reaction the author actually has is fine. A fact they didn't give is not.
+
+### 9.7 No stance
+Two 2025 studies by Jiang and Hyland compared ChatGPT's argumentative essays with essays by British university students. The model used significantly fewer hedges, boosters and attitude markers, the words that show where a writer is sure, unsure or moved (*English for Specific Purposes*). It also used fewer questions and asides aimed at the reader, and leaned on appeals to shared knowledge instead (*Written Communication*, 145 essays per group). The result is organized and impersonal: it surveys a question without saying what the writer thinks.
+
+**Watch for:**
+- a balanced tour of both sides that never lands: "both have their pros and cons," "ultimately, it depends on your needs," "there's no one-size-fits-all answer"
+- every claim at the same flat confidence, with no "I'm sure of this" and no "I'm not sure about that"
+- a piece that argues something but never raises an objection, let alone answers one
+
+**Fix:** this is the one sign an editor can't fix alone, because the missing part is the author's view. Ask for it: which side they're on and why, where they're unsure, the strongest objection they've heard and their answer, an example of their own. Then write with what they give. If the view is already in the draft, buried in the middle, bring it to the front. Don't supply an opinion, a doubt or a counterargument the author didn't give (9.6), and don't sprinkle hedges to fake hesitation (2.8).
