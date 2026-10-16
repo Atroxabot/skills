@@ -42,6 +42,21 @@
         "Matches the sample's casual, self-deprecating voice",
         "Asks for or marks missing specifics"
       ]
+    },
+    {
+      "id": 4,
+      "name": "hz-member-update",
+      "prompt": "tidy this up so it doesn't read like AI, it's going out as our monthly update to garden members\n\nHi everyone,\n\nCommunity has always been our north star. This spring the garden welcomed everything from first-time growers to seasoned composters, and the energy was truly something special.\n\nQuick recap:\nTool shed → new lock, code at the front desk\nWorkdays → moved to Saturdays 9-12\nWater bill ↑ 30%, could potentially mean higher dues\n\nThe secret: showing up. See you in the beds.",
+      "expected_output": "A plain member update that keeps the four real facts (new tool-shed lock with the code at the front desk, workdays now Saturdays 9-12, water bill up 30%, dues may rise), writes the arrow notes as whole sentences, drops the north star line, the false range, the 'something special' mood line and the 'The secret:' closer, uses a single hedge for the dues, invents nothing about the spring, and gives a short change list.",
+      "files": [],
+      "assertions": [
+        "Keeps the four real facts: new tool-shed lock with the code at the front desk, workdays on Saturdays 9-12, water bill up 30%, dues may rise",
+        "The update itself contains no arrows or arrow symbols; the notes are whole sentences",
+        "No 'north star', 'everything from X to Y' or 'truly something special'",
+        "One hedge for the dues ('may' or 'might'), not 'could potentially'",
+        "No 'The secret:' style closer",
+        "Invents no spring details (member counts, harvests, names) and asks or marks a placeholder if it keeps that paragraph"
+      ]
     }
   ]
 }

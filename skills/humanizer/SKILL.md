@@ -46,11 +46,13 @@ These must survive the edit.
 
 Go through the text against the catalog, in this order of importance:
 
-1. **Content** (catalog section 1): inflated significance, coverage-bragging, trailing "-ing" analysis, promotional tone, vague association, vague attribution, the "despite challenges" formula, hedging disclaimers. These are the real problems.
-2. **Language** (section 2): AI vocabulary density, avoiding "is"/"has," negative parallelisms, rule-of-three lists, elegant variation, monotone rhythm.
-3. **Formatting** (section 3): Title Case headings, bold everywhere, `**Label:**` bullets, emoji bullets, needless tables, em-dash habits, markdown where it won't render.
+1. **Content** (catalog section 1): inflated significance, coverage-bragging, trailing "-ing" analysis, promotional tone, vague association, vague attribution, the "despite challenges" formula, hedging disclaimers, sentences that only name a feeling. These are the real problems.
+2. **Language** (section 2): AI vocabulary density, avoiding "is"/"has," negative parallelisms, rule-of-three lists, elegant variation, monotone rhythm, false ranges, stacked hedges, stock metaphors.
+3. **Formatting** (section 3): Title Case headings, bold everywhere, `**Label:**` bullets, emoji bullets, needless tables, em-dash habits, colon drumrolls, markdown where it won't render, note-speak with arrows.
 4. **Residue** (sections 4 and 6): "Certainly!", "I hope this helps," unfilled placeholders, "It's important to note," "In conclusion."
 5. **Social patterns** (section 8), if it's a post: stock lines, broetry, engagement bait.
+
+One quick test catches many content signs: could the sentence appear unchanged in someone else's text, on a rival's About page or in another person's bio? If it could, it says nothing about this one (catalog 1.9).
 
 If you can run code, `python3 scripts/ai_signs.py draft.txt` gives you a first pass with line numbers. Pipe the text on stdin if it isn't in a file. The scanner catches word- and pattern-level signs. It cannot judge content signs well, so read for those yourself.
 
@@ -71,13 +73,19 @@ Work sentence by sentence, fixing the cause:
 | Inflated significance, legacy, "pivotal moment" | State what happened. Show significance with a fact, or cut. |
 | Trailing "-ing" analysis | Delete the clause. A real interpretation becomes its own sentence. |
 | Promotional adjectives | Replace with what the thing has, does or costs. |
+| Sentences that name a feeling ("feels like home") | Say what it has or does. If the line would fit anyone's text, cut it. |
 | Vague attribution ("experts say") | Name the source the user gave, own the opinion, or cut. Never invent a source. |
 | "Serves as," "boasts," "features" | Use "is" and "has." |
 | "It's not X, it's Y" and its family | Say what it is. Keep a contrast only if readers really believe X, and name that belief. |
 | Rule-of-three lists | Keep the item that matters, or make the items concrete and uneven. |
 | AI vocabulary | Use a plain word, or better, a fact. Don't swap in a fancier synonym. |
+| Stock metaphors (north star, bedrock, "harness the power of") | Use the plain word, or the concrete thing it points at. |
+| False ranges ("everything from X to Y") | List what's really there, or name the one that matters. |
+| Stacked hedges ("could potentially") | Keep one hedge where the doubt is real, or none. |
 | Monotone rhythm | Vary sentence length on purpose. Allow a fragment, a long sentence, a question, a colon. |
 | Bold, bold-label bullets, emoji bullets | Use prose, or a plain list. Emphasis comes from the sentence. |
+| Colon drumrolls ("The secret: ...") | Write the sentence without the setup. |
+| Arrows and note-speak | Write whole sentences, with their verbs and articles. |
 | Chatbot residue, summaries, disclaimers | Delete. |
 
 If the draft has almost no real content (pure filler around one or two facts), say so plainly. A short, true draft plus two or three questions that would unlock the real story is better than a lively version built on invented experiences. In testing, a version without this skill invented a whole year of mishaps for the author. It read well, and it was fiction.
