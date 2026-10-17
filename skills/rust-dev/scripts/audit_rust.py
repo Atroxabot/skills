@@ -57,7 +57,8 @@ NON_SHIPPED_DIRS = {"tests", "benches", "examples", "fuzz"}
 ALLOWED = {
     # GUI and rendering
     "wgpu", "winit", "bytemuck", "pollster", "glam", "fontdue", "cosmic-text",
-    "png", "zune-jpeg",
+    "png", "zune-jpeg", "unicode-segmentation", "arboard", "rfd", "accesskit",
+    "accesskit_winit",
     # concurrency
     "rayon", "rtrb", "crossbeam-queue", "core_affinity",
     # async and networking
@@ -167,7 +168,7 @@ def banned_reason(name):
     if name in BANNED:
         return BANNED[name]
     if name in GUI_BANNED or any(p.search(name) for p in GUI_BANNED_PATTERNS):
-        return "GUIs are built on raw wgpu + winit (references/gui-wgpu.md)"
+        return "GUIs are built on raw wgpu + winit (see the rust-gui skill)"
     return None
 
 

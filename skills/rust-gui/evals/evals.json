@@ -1,0 +1,38 @@
+{
+  "skill_name": "rust-gui",
+  "evals": [
+    {
+      "id": 1,
+      "name": "rg-node-editor",
+      "prompt": "Start a new Rust desktop app: a node-graph editor for audio patches. Pan and zoom a canvas with a few hundred nodes and wires, drag nodes around, a side panel with properties. Needs to feel instant. Set up the project and the rendering.",
+      "expected_output": "Checks the current wgpu and winit versions first. Starts from the skill's skeleton workspace (core with graph state, layout and hit-testing and no wgpu; a render crate on wgpu; a thin app crate on winit), keeping its lint table, profiles, pinned toolchain and deny.toml. Renders with raw wgpu and a hand-built UI: no egui, iced or other framework. Redraws on demand, creates pipelines once, batches nodes and wires into instanced draws in persistent buffers, keeps per-frame allocation at zero, and handles every surface state and uncaptured GPU errors without panicking. Errors are hand-written enums, with no unwrap or expect outside tests. Text uses an atlas with fontdue or cosmic-text. Gives a frame-time budget and says how it will be measured.",
+      "files": [],
+      "assertions": [
+        "Uses raw wgpu and winit with a hand-built UI; does not use egui, iced, Bevy or any other UI framework",
+        "Starts from the skeleton or an equivalent Cargo workspace with a GPU-free core crate",
+        "Checks or states the current wgpu/winit versions instead of assuming an API",
+        "Redraws on demand (ControlFlow::Wait plus request_redraw) instead of rendering continuously",
+        "Pipelines and buffers are created once and reused; draws are batched or instanced",
+        "No unwrap, expect or panic in non-test code; errors are hand-written enums, not thiserror or anyhow",
+        "Handles the surface states (outdated, lost, timeout or occluded) and installs an uncaptured-error handler",
+        "States a frame-time budget or how frame time will be measured"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "rg-text-input",
+      "prompt": "Our Rust note-taking app (wgpu + winit, our own UI) has a search box. Japanese users say they can't type in it, and someone noticed backspace on an emoji leaves garbage. Also add copy/paste and an 'Open file…' button. Here's the current key handler:\n\n```rust\nWindowEvent::KeyboardInput { event, .. } if event.state.is_pressed() => {\n    match event.logical_key {\n        Key::Named(NamedKey::Backspace) => { self.query.pop(); }\n        _ => if let Some(t) = event.text { self.query.push_str(&t); }\n    }\n    if self.ctrl && event.logical_key == Key::Character(\"o\".into()) {\n        if let Some(path) = rfd::FileDialog::new().pick_file() { self.open(path); }\n    }\n}\n```",
+      "expected_output": "Explains that the field never enables IME (set_ime_allowed on focus, set_ime_cursor_area at the caret) and ignores Ime::Preedit/Commit, which is why Japanese input fails; that String::pop removes one char, not one grapheme, so ZWJ emoji and combining accents break; and that the blocking FileDialog freezes the frame loop. Moves editing into a core TextField like the skill's skeleton (grapheme-aware via unicode-segmentation, caret and selection, preedit shown at the caret, commit, bounded and control-filtered input), routes Ime events and suppresses key text while composing, adds Ctrl/Cmd shortcuts matched on logical_key with an arboard clipboard (one instance, optional when unavailable, default features off), and switches to AsyncFileDialog started on the event-loop thread, awaited on a helper thread and returned as a user event. Adds unit tests for emoji and combining-mark deletion and preedit, and recommends testing with a real IME per platform.",
+      "files": [],
+      "assertions": [
+        "Enables IME only while the text field is focused and sets the IME cursor area near the caret",
+        "Handles Ime::Preedit and Ime::Commit, and avoids inserting key text twice while composing",
+        "Deletes by grapheme cluster (e.g. unicode-segmentation), not by char",
+        "Uses a single long-lived clipboard instance and does not panic when the clipboard is unavailable",
+        "Replaces the blocking file dialog with one that doesn't block the event loop, returning the result as a user event",
+        "Keeps editing logic in a winit-free core type with unit tests for emoji and combining characters",
+        "Does not introduce a GUI framework, unwrap/expect, or thiserror/anyhow"
+      ]
+    }
+  ]
+}

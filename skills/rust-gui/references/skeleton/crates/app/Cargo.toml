@@ -1,0 +1,18 @@
+[package]
+name = "app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+app-core.workspace = true
+app-render.workspace = true
+arboard.workspace = true
+pollster.workspace = true
+rfd.workspace = true
+wgpu.workspace = true
+winit.workspace = true
+
+[lints]
+workspace = true

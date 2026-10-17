@@ -3,23 +3,6 @@
   "evals": [
     {
       "id": 1,
-      "name": "rd-gui-node-editor",
-      "prompt": "Start a new Rust desktop app: a node-graph editor for audio patches. Pan and zoom a canvas with a few hundred nodes and wires, drag nodes around, a side panel with properties. Needs to feel instant. Set up the project and the rendering.",
-      "expected_output": "Checks the current wgpu and winit versions first. Sets up a Cargo workspace (core with graph state, layout and hit-testing and no wgpu; a render crate on wgpu; a thin app crate on winit), with the shared lint table, clippy.toml, release profile and a pinned toolchain on edition 2024. Renders with raw wgpu and a hand-built UI: no egui, iced or other framework. Redraws on demand, creates pipelines once, batches nodes and wires into instanced draws in persistent buffers, keeps per-frame allocation at zero, and handles every surface state and uncaptured GPU errors without panicking. Errors are hand-written enums, with no unwrap or expect outside tests. Text uses an atlas with fontdue or cosmic-text. Gives a frame-time budget and says how it will be measured.",
-      "files": [],
-      "assertions": [
-        "Uses raw wgpu and winit with a hand-built UI; does not use egui, iced, Bevy or any other UI framework",
-        "Structures the project as a Cargo workspace with a GPU-free core crate",
-        "Checks or states the current wgpu/winit versions instead of assuming an API",
-        "Redraws on demand (ControlFlow::Wait plus request_redraw) instead of rendering continuously",
-        "Pipelines and buffers are created once and reused; draws are batched or instanced",
-        "No unwrap, expect or panic in non-test code; errors are hand-written enums, not thiserror or anyhow",
-        "Handles the surface states (outdated, lost, timeout or occluded) and installs an uncaptured-error handler",
-        "States a frame-time budget or how frame time will be measured"
-      ]
-    },
-    {
-      "id": 2,
       "name": "rd-low-latency-feed",
       "prompt": "We need a Rust service that receives market data over UDP multicast (about 2M messages/sec at peak), normalizes each message, and publishes to our strategy engine in the same process. p99 latency from packet to strategy must be under 10 microseconds. We also need to log every message to disk for audit. I was thinking tokio for everything?",
       "expected_output": "Pushes back on tokio for the hot path, explaining that async isn't faster per operation and a work-stealing runtime can't bound tail latency. Proposes dedicated threads: a pinned receive/normalize hot thread that busy-polls, SPSC ring buffers (rtrb) between stages, and a cold thread for disk logging that the hot path never waits on, with an explicit policy for when the audit queue is full (since audit can't drop silently, it sizes the buffer for the burst and alarms, or blocks ingest, and says which). No allocation, locks, logging or syscalls in the hot loop beyond the receive itself, cache-padded counters, core isolation as a deployment requirement, and a preallocated latency histogram reporting p99/p99.9. Code follows the no-panic and hand-written error rules.",
@@ -34,7 +17,7 @@
       ]
     },
     {
-      "id": 3,
+      "id": 2,
       "name": "rd-review-crate",
       "prompt": "Review this before I merge:\n\n```toml\n[package]\nname = \"ingest\"\nedition = \"2021\"\n\n[dependencies]\nanyhow = \"1\"\nthiserror = \"2\"\nonce_cell = \"1\"\ntokio = { version = \"1\", features = [\"full\"] }\nreqwest = \"0.12\"\n```\n\n```rust\nuse once_cell::sync::Lazy;\nstatic CLIENT: Lazy<reqwest::Client> = Lazy::new(|| reqwest::Client::new());\n\n#[derive(thiserror::Error, Debug)]\npub enum IngestError { #[error(\"http\")] Http(#[from] reqwest::Error) }\n\n#[tokio::main]\nasync fn main() -> anyhow::Result<()> {\n    let urls = std::fs::read_to_string(\"urls.txt\")?;\n    for url in urls.lines() {\n        let body = CLIENT.get(url).send().await?.text().await?;\n        let first = &body[0..100];\n        let n: usize = first.split(',').next().unwrap().parse().unwrap();\n        std::thread::sleep(std::time::Duration::from_millis(100));\n        println!(\"{url} {n}\");\n    }\n    Ok(())\n}\n```",
       "expected_output": "A ranked review. Panics first: &body[0..100] panics on short bodies and on a non-char boundary, and both unwraps panic on malformed input. Then: blocking std::thread::sleep and std::fs inside async code; no timeouts on requests; sequential requests (if async is justified at all, run them concurrently with a bound, otherwise blocking threads are simpler); thiserror, anyhow and once_cell are banned (hand-written error enum with context such as the URL, std LazyLock); tokio \"full\" and #[tokio::main] defaults; edition 2021 instead of 2024; reqwest isn't on the allowlist and needs a # why: (or hyper from the allowlist); no lint table. Mentions running the audit script and gives concrete fixed code.",
@@ -52,7 +35,7 @@
       ]
     },
     {
-      "id": 4,
+      "id": 3,
       "name": "rd-cli-wordfreq",
       "prompt": "Write a Rust CLI `wf` that prints the 20 most frequent words across one or more files (or stdin), case-insensitive. Files can be tens of GB. Output should be `count<TAB>word` lines.",
       "expected_output": "A small crate (or workspace if it grows) with lexopt or args_os parsing into typed args, PathBuf/OsString for paths, '-' for stdin. Streams input with a reused buffer instead of reading whole files, handles non-UTF-8 input deliberately, writes through a locked BufWriter and treats a broken pipe as success, sends errors to stderr and returns ExitCode (2 for usage errors). Hand-written error enum carrying the path. Considers parallelism across files with deterministic output order, and mentions the hasher trade-off only with measurement. Includes tests for usage errors and a closed pipe, and a benchmark for the counting path.",
@@ -67,7 +50,7 @@
       ]
     },
     {
-      "id": 5,
+      "id": 4,
       "name": "rd-errors-library",
       "prompt": "Our Rust library parses a binary packet format. Right now every function returns Result<T, String>. Make the errors proper. Here's the main function:\n\n```rust\npub fn parse_packet(buf: &[u8]) -> Result<Packet, String> {\n    if buf.len() < 4 { return Err(\"too short\".into()); }\n    let len = u16::from_be_bytes([buf[0], buf[1]]) as usize;\n    let kind = buf[2];\n    if buf.len() < 4 + len { return Err(format!(\"truncated: need {}\", 4 + len)); }\n    let payload = buf[4..4 + len].to_vec();\n    let kind = Kind::try_from(kind).map_err(|_| format!(\"bad kind {kind}\"))?;\n    Ok(Packet { kind, payload })\n}\n```\nCan I just add thiserror?",
       "expected_output": "Says no to thiserror and explains why, then writes a hand-written #[non_exhaustive] error enum (TooShort { len }, Truncated { needed, available }, UnknownKind(u8)) with Display impls describing only this layer and an Error impl. Rewrites the parser without indexing or slicing that can panic (split_first_chunk / get / split_at_checked), with checked arithmetic on 4 + len. Adds tests that match on variants, a proptest that arbitrary bytes never panic and round-trip encode/parse where an encoder exists, and a cargo-fuzz target since the input is untrusted.",
@@ -82,7 +65,7 @@
       ]
     },
     {
-      "id": 6,
+      "id": 5,
       "name": "rd-http-service",
       "prompt": "Build a Rust HTTP JSON API for a link shortener: create short link, resolve, and stats. Expect ~20k concurrent clients at peak. Postgres for storage.",
       "expected_output": "States the concurrency decision (many mostly-waiting connections, so async on tokio is justified). Sets up a workspace (core logic without I/O, a service crate, a thin binary). tokio with only the needed features and an explicit runtime builder, axum and hyper from the allowlist, a database driver with a # why: line. Body size limits, timeouts on every request and DB call, a bounded connection pool, graceful shutdown on SIGTERM and Ctrl-C with a drain deadline, typed config parsed and validated at startup, secrets from the environment, tracing with a span per request, health and readiness endpoints. Hand-written error enum mapped to status codes in one place. Integration tests on port 0 cover limits and shutdown.",

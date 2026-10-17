@@ -81,7 +81,7 @@ Read the reference for the kind of application before writing it:
 
 | Building | Read | The short version |
 |---|---|---|
-| GUI app, game, visualization, editor | [references/gui-wgpu.md](references/gui-wgpu.md) | **Always raw wgpu + winit with a hand-built UI.** Never egui, iced, Slint, GTK, Tauri, Bevy or any other UI framework or renderer. Redraw on demand, batch everything into a few draw calls, create pipelines once, no per-frame allocation. A frame-time budget is a requirement, not a hope. |
+| GUI app, game, visualization, editor | The **rust-gui** skill, which has a verified workspace skeleton to start from | **Always raw wgpu + winit with a hand-built UI.** Never egui, iced, Slint, GTK, Tauri, Bevy or any other UI framework or renderer. Redraw on demand, batch everything into a few draw calls, create pipelines once, no per-frame allocation. A frame-time budget is a requirement, not a hope. |
 | CLI tool | [references/cli.md](references/cli.md) | `lexopt` or `std::env::args_os`, a locked and buffered stdout, broken pipes treated as success, data on stdout and diagnostics on stderr, meaningful exit codes, streaming instead of loading whole inputs. |
 | Server, daemon, network service | [references/services.md](references/services.md) | Pick the concurrency model first. When it's tokio: explicit runtime, bounded everything (queues, connections, body sizes, timeouts), graceful shutdown, `tracing` for observability. |
 | Library crate | [references/libraries.md](references/libraries.md) | Small public API, `#[non_exhaustive]` on what may grow, no dependency types in the public API, additive features, docs with runnable examples, `cargo-semver-checks` before release. |
@@ -129,7 +129,7 @@ Commands, CI layout and what a good property or fuzz target looks like are in [r
 - [references/dependencies.md](references/dependencies.md): the allowlist, the banned list, how to evaluate any other crate, `deny.toml`.
 - [references/performance.md](references/performance.md): data layout, allocation, dispatch, hashing, I/O, SIMD, release settings, profiling and benchmarking.
 - [references/concurrency.md](references/concurrency.md): choosing threads or async, the hot/cold split with ring buffers (verified example), memory ordering, false sharing, backpressure.
-- [references/gui-wgpu.md](references/gui-wgpu.md): raw wgpu + winit architecture, a compiling skeleton, frame loop, resource rules, building the UI, text, testing.
+- GUI apps, games and visualizations: the **rust-gui** skill (raw wgpu + winit, the verified skeleton, rendering rules, text input and IME, clipboard, dialogs, accessibility).
 - [references/cli.md](references/cli.md), [references/services.md](references/services.md), [references/libraries.md](references/libraries.md), [references/embedded.md](references/embedded.md): per application type.
 - [references/verification.md](references/verification.md): tests, proptest, cargo-fuzz, Miri, sanitizers, criterion, cargo-deny, the CI pipeline.
 - `scripts/audit_rust.py`: scans a crate or workspace for the mechanical rule breaks above. `--json` for machine output, `--strict` to fail on warnings, `--cargo` to also run fmt, clippy and tests.

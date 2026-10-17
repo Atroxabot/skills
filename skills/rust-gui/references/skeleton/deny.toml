@@ -1,0 +1,29 @@
+[graph]
+all-features = true
+
+[advisories]
+version = 2
+yanked = "deny"
+# Every entry says why it doesn't apply and when to look again.
+ignore = [
+    { id = "RUSTSEC-2026-0192", reason = "ttf-parser is unmaintained (no vulnerability). It comes in through winit's Wayland title bar drawing (sctk-adwaita), which parses only system fonts. Dropping winit's wayland-csd-adwaita feature would remove it but leave windows on GNOME Wayland without a title bar. Review 2027-01." },
+]
+
+[licenses]
+version = 2
+allow = ["MIT", "Apache-2.0", "Apache-2.0 WITH LLVM-exception", "BSD-2-Clause", "BSD-3-Clause", "BSL-1.0", "ISC", "Unicode-3.0", "Zlib"]
+confidence-threshold = 0.9
+private = { ignore = true }  # our own unpublished crates (publish = false) need no license
+
+[bans]
+multiple-versions = "warn"   # wgpu's and winit's trees have duplicates; review them, don't fail on them
+wildcards = "deny"
+allow-wildcard-paths = true  # path dependencies between our own unpublished crates
+deny = [
+    { name = "async-std" },
+    { name = "atty" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

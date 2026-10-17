@@ -46,6 +46,10 @@ Pre-approved for the use named. Using one outside its use still needs a `# why:`
 | `fontdue` | Glyph rasterization for UIs with simple scripts (Latin, Cyrillic, Greek). |
 | `cosmic-text` | Text shaping, bidirectional text and layout when the UI must handle any script or rich text. |
 | `png`, `zune-jpeg` | Decoding those image formats. Not the umbrella `image` crate, which pulls in every format. |
+| `unicode-segmentation` | Grapheme boundaries for caret movement and deletion in text fields (not needed when `cosmic-text`'s editor handles it). |
+| `arboard` (with `default-features = false, features = ["wayland-data-control"]`) | The OS clipboard. The defaults pull in the whole `image` crate for image copy and paste. |
+| `rfd` | Native file and message dialogs. |
+| `accesskit`, `accesskit_winit` | Screen reader support, when the app needs it (decide at project start; see the rust-gui skill). With tokio in the app, enable `accesskit_winit`'s `tokio` feature instead of its default `async-io`. |
 | **Concurrency** | |
 | `rayon` | Data-parallel CPU work. |
 | `rtrb` | Lock-free SPSC ring buffers between hot and cold threads. |
@@ -89,7 +93,7 @@ Never added, with or without a `# why:`:
 |---|---|---|
 | `thiserror`, `anyhow`, `eyre`, `color-eyre`, `snafu`, `quick-error`, `displaydoc`, `failure`, `error-chain` | Errors are written by hand ([errors.md](errors.md)). | Hand-written enums |
 | `lazy_static`, `once_cell` | In std since 1.80. | `LazyLock`, `OnceLock` |
-| `egui`, `eframe`, `egui-wgpu`, `egui-winit`, `iced`, `slint`, `gtk`, `gtk4`, `relm4`, `tauri`, `druid`, `xilem`, `masonry`, `floem`, `vizia`, `freya`, `dioxus`, `gpui`, `fltk`, `makepad-widgets`, `imgui`, `dear-imgui-*` | GUIs are built on raw wgpu ([gui-wgpu.md](gui-wgpu.md)). A framework decides the frame loop, the allocation pattern and the draw-call count for us. | Hand-built UI on wgpu |
+| `egui`, `eframe`, `egui-wgpu`, `egui-winit`, `iced`, `slint`, `gtk`, `gtk4`, `relm4`, `tauri`, `druid`, `xilem`, `masonry`, `floem`, `vizia`, `freya`, `dioxus`, `gpui`, `fltk`, `makepad-widgets`, `imgui`, `dear-imgui-*` | GUIs are built on raw wgpu (the rust-gui skill). A framework decides the frame loop, the allocation pattern and the draw-call count for us. | Hand-built UI on wgpu |
 | `bevy`, `macroquad`, `ggez`, `fyrox`, `pixels`, `softbuffer`, `minifb` | Engines and framebuffer layers on top of, or instead of, wgpu. | wgpu |
 | `glium`, `glow`, `glutin`, `gl`, `sdl2`, `sdl3`, `raylib`, `vulkano`, `ash` | Other graphics APIs. wgpu covers Vulkan, Metal, DX12 and WebGPU behind one safe API. | wgpu |
 | `async-std` | Discontinued. | `tokio`, or threads |
@@ -97,7 +101,7 @@ Never added, with or without a `# why:`:
 
 ## `deny.toml`
 
-Run `cargo deny check` in CI. A starting point:
+Run `cargo deny check` in CI. This configuration passes on the rust-gui skill's skeleton workspace (cargo-deny 0.20) and is a good starting point:
 
 ```toml
 [graph]
@@ -106,16 +110,20 @@ all-features = true
 [advisories]
 version = 2
 yanked = "deny"
-ignore = []                 # every entry needs a comment: advisory id, why it doesn't apply, review date
+# Every entry says why it doesn't apply and when to look again, for example:
+# { id = "RUSTSEC-YYYY-NNNN", reason = "only reachable through X, which we don't use. Review 2027-01." },
+ignore = []
 
 [licenses]
 version = 2
-allow = ["MIT", "Apache-2.0", "Apache-2.0 WITH LLVM-exception", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Unicode-3.0", "Zlib"]
+allow = ["MIT", "Apache-2.0", "Apache-2.0 WITH LLVM-exception", "BSD-2-Clause", "BSD-3-Clause", "BSL-1.0", "ISC", "Unicode-3.0", "Zlib"]
 confidence-threshold = 0.9
+private = { ignore = true }  # crates with publish = false need no license; set it on every app and internal crate
 
 [bans]
-multiple-versions = "warn"  # wgpu's tree has some duplicates; review them, don't fail on them
+multiple-versions = "warn"   # big trees (wgpu, winit, tokio) have duplicates; review them, don't fail on them
 wildcards = "deny"
+allow-wildcard-paths = true  # path dependencies between our own unpublished workspace crates
 deny = [
     { name = "async-std" },
     { name = "atty" },
@@ -126,4 +134,10 @@ unknown-registry = "deny"
 unknown-git = "deny"
 ```
 
-Most of the banned list isn't in `bans.deny`, because cargo-deny checks the whole dependency tree, and popular crates pull some of them in transitively: wgpu brings `thiserror`, and winit brings `once_cell`. The rule is about what our code uses, so the audit script enforces it on direct dependencies instead. `cargo deny check advisories` covers the RustSec database, so `cargo audit` isn't needed separately.
+What each part protects against:
+- **Advisories:** dependencies with known vulnerabilities, or marked unmaintained, in the RustSec database. `cargo deny check advisories` covers what `cargo audit` does, so `cargo audit` isn't needed separately. An unmaintained crate deep in a dependency's tree (winit pulls in `ttf-parser` for Wayland title bars, for example) usually can't be removed by us: ignore it with a reason and a review date rather than turning the check off.
+- **Licenses:** every crate we ship comes with a license, and some licenses put conditions on our product (GPL, for example, can require releasing our source). The allow list holds permissive licenses that only ask for attribution. A new dependency under any other license fails the check, so someone decides about it on purpose instead of finding out at release.
+- **Bans:** crates we never want anywhere in the tree, and dependencies declared without a version.
+- **Sources:** code only from crates.io, not from unknown registries or git repositories.
+
+Most of the banned list isn't in `bans.deny`, because cargo-deny checks the whole dependency tree, and popular crates pull some of them in transitively: wgpu brings `thiserror`, and winit brings `once_cell`. The rule is about what our code uses, so the audit script enforces it on direct dependencies instead.
