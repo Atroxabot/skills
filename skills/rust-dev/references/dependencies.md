@@ -64,6 +64,7 @@ Pre-approved for the use named. Using one outside its use still needs a `# why:`
 | **Security** | |
 | `ring`, `sha2`, `hmac`, `blake3`, `subtle` | Cryptographic primitives. Never write your own cryptography. |
 | **Data** | |
+| `zerocopy` (with `derive`) | Zero-copy, endian-aware parsing of binary formats from untrusted bytes. |
 | `serde` (with `derive`), `serde_json` | Serialization, when JSON is the format we have to speak. For formats we control, a hand-written binary encoding is often faster and simpler. |
 | **Observability** | |
 | `tracing`, `tracing-subscriber` | Structured logs and spans in services. CLIs usually need neither. |

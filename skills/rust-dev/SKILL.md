@@ -41,10 +41,10 @@ These hold in every project. Each one has a reason, and knowing the reason is ho
 1. **No panics in non-test code.** No `unwrap`, `expect`, `panic!`, `todo!`, `unimplemented!`, `unreachable!` or `assert!`, and no indexing or slicing that can go out of bounds. Use `get`, iterators, `split_at_checked`, pattern matching, and `Result`. A panic in production is a crash (we build with `panic = "abort"`), and "this can't fail" is the assumption that most often turns out wrong. Invariants you want checked go in `debug_assert!`, which runs under tests, fuzzing and debug builds, and compile-time `const` assertions are fine because they fail the build, not the program. If something truly can't fail, encode that in the types so there's nothing to unwrap. Tests may unwrap freely; `clippy.toml` allows it there.
 2. **Errors are hand-written types.** Never `thiserror`, `anyhow`, `eyre`, `snafu` or any other error crate, and no `Box<dyn Error>` outside tests and examples. Each module or operation has an error enum with `Display` and `std::error::Error` written by hand, carrying the context needed to act on it. Error crates hide what the type contains behind a macro and tempt you into one giant catch-all error. Writing the impl takes a few minutes and keeps every variant deliberate. Patterns are in [references/errors.md](references/errors.md).
 3. **Dependencies only when necessary.** Crates on the allowlist in [references/dependencies.md](references/dependencies.md) may be added for their stated use. Any other crate needs a `# why:` comment on its line in `Cargo.toml` that says what it does that we can't reasonably write, and it must pass the checks in that file (maintenance, size, transitive tree, unsafe use, license). Each dependency is code we ship and don't review, a supply-chain risk, and compile time. Before adding one, check whether `std` already does the job: `LazyLock` and `OnceLock` replace `lazy_static` and `once_cell`, `std::io::IsTerminal` replaces `atty`, and `std::sync::mpsc` is a fine channel off the hot path.
-4. **`unsafe` is isolated, justified and tested.** `unsafe_code` is denied workspace-wide. Unsafe is allowed only for FFI, hardware access, or a measured speedup that safe code can't reach. It lives in a dedicated module that opts in with `#[expect(unsafe_code, reason = "...")]`. Every block holds one unsafe operation with a `// SAFETY:` comment saying why it's sound, every `unsafe fn` has a `# Safety` doc section, a safe API wraps it, and its tests run under Miri and AddressSanitizer. Unsafe code is where Rust's guarantees stop, so the proof has to be written down where a reviewer can check it.
+4. **`unsafe` is isolated, justified and tested.** `unsafe_code` is denied workspace-wide. Unsafe is allowed only for FFI ([references/ffi.md](references/ffi.md)), hardware access, or a measured speedup that safe code can't reach. It lives in a dedicated module that opts in with `#[expect(unsafe_code, reason = "...")]`. Every block holds one unsafe operation with a `// SAFETY:` comment saying why it's sound, every `unsafe fn` has a `# Safety` doc section, a safe API wraps it, and its tests run under Miri and AddressSanitizer. Unsafe code is where Rust's guarantees stop, so the proof has to be written down where a reviewer can check it.
 5. **Explain exceptions where they happen.** No `#[allow]`. Use `#[expect(lint, reason = "...")]`, which errors when the lint stops firing, so stale exceptions don't pile up. A reason like "false positive" isn't enough; say why the code is right.
 6. **Integer overflow is a bug, never silent.** Release builds keep `overflow-checks = true`. Arithmetic on values from outside the process uses `checked_*` or `saturating_*`. Hot loops that are proven in bounds use `wrapping_*`, which the flag doesn't affect, so speed doesn't cost correctness. Silent wraparound corrupts data without a trace, and a crash at least points at the bug.
-7. **The checks pass before the work is done:** `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace`, `cargo deny check`, and the audit script. When unsafe code changed, Miri as well, and criterion benchmarks when a hot path changed.
+7. **The checks pass before the work is done, without slowing it down.** On every change: `cargo fmt`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test` for the changed crates, and the audit script, which together take seconds. CI runs the full suite and `cargo deny check` on every pull request. Miri, sanitizers, fuzzing and benchmarks run only when the change calls for them (unsafe, FFI or parser changes, hot paths). Verification that takes minutes per edit gets skipped, so the expensive tools are triggered, not routine.
 
 More rules, with their reasons (types, naming, function size, documentation, recursion, global state), are in [references/code-standards.md](references/code-standards.md).
 
@@ -89,16 +89,17 @@ Read the reference for the kind of application before writing it:
 
 ## Verification
 
-Unit tests alone aren't enough at this bar. What each project needs:
+Checks are tiered by cost, so they catch bugs without slowing development:
 
-- **Unit and integration tests** for behavior, including every error path a caller can hit. Every bug fix comes with a test that fails before the fix.
-- **Property tests** (`proptest`) for invariants: round-trips, ordering, idempotence, agreement with a slow reference implementation.
-- **Fuzzing** (`cargo-fuzz`) for every function that parses untrusted input. Run each target for a set time in CI and keep the corpus.
-- **Miri** for every crate with unsafe code, and **AddressSanitizer / ThreadSanitizer** for unsafe and lock-free code.
-- **Benchmarks** (`criterion`) for hot paths, compared against a saved baseline when those paths change.
-- **`cargo deny check`** in CI for advisories, licenses, banned crates and duplicate versions.
+| When | What |
+|---|---|
+| Every change, locally (seconds) | fmt, clippy, tests of the changed crates (unit, integration and property tests), the audit script |
+| Every pull request, in CI | All of the above for the whole workspace, `cargo deny check`, docs |
+| Only when the change calls for it | **Miri** and **sanitizers** when unsafe, FFI or lock-free code changed. **Fuzzing** (`cargo-fuzz`) when a parser of untrusted input is added or changed, with longer runs on a schedule. **Benchmarks** (`criterion`) when a hot path changed. `cargo semver-checks` when releasing a library |
 
-Commands, CI layout and what a good property or fuzz target looks like are in [references/verification.md](references/verification.md).
+What each project needs in its tests: every error path a caller can hit, a regression test with every bug fix, property tests (`proptest`) for invariants (round-trips, ordering, agreement with a slow reference), and a fuzz target for every parser of untrusted input.
+
+That's the whole toolset. Don't add more verification tools (mutation testing, model checkers, coverage gates, extra linters) by default: each needs a reason, like a dependency does. Commands, CI layout, time budgets and good property and fuzz targets are in [references/verification.md](references/verification.md).
 
 ## Workflow
 
@@ -124,14 +125,15 @@ Commands, CI layout and what a good property or fuzz target looks like are in [r
 ## References
 
 - [references/code-standards.md](references/code-standards.md): the lint configuration, `clippy.toml`, release profile and toolchain file to copy; idiomatic Rust; the panic, unsafe and arithmetic rules in detail; types, naming, size limits, docs; review checklist.
-- [references/workspace.md](references/workspace.md): workspace manifests, crate boundaries, shared dependencies and lints.
+- [references/workspace.md](references/workspace.md): workspace manifests, crate boundaries, shared dependencies and lints, fast builds.
 - [references/errors.md](references/errors.md): hand-written error enums, `source()` chains, adding context, reporting at `main`, error types in libraries.
 - [references/dependencies.md](references/dependencies.md): the allowlist, the banned list, how to evaluate any other crate, `deny.toml`.
-- [references/performance.md](references/performance.md): data layout, allocation, dispatch, hashing, I/O, SIMD, release settings, profiling and benchmarking.
+- [references/performance.md](references/performance.md): data layout, allocation, dispatch, hashing, I/O, zero-copy parsing, SIMD, release settings, profiling and benchmarking.
 - [references/concurrency.md](references/concurrency.md): choosing threads or async, the hot/cold split with ring buffers (verified example), memory ordering, false sharing, backpressure.
 - GUI apps, games and visualizations: the **rust-gui** skill (raw wgpu + winit, the verified skeleton, rendering rules, text input and IME, clipboard, dialogs, accessibility).
 - [references/cli.md](references/cli.md), [references/services.md](references/services.md), [references/libraries.md](references/libraries.md), [references/embedded.md](references/embedded.md): per application type.
-- [references/verification.md](references/verification.md): tests, proptest, cargo-fuzz, Miri, sanitizers, criterion, cargo-deny, the CI pipeline.
+- [references/verification.md](references/verification.md): when each check runs and its time budget, tests, proptest, cargo-fuzz, Miri, sanitizers, criterion, cargo-deny, the CI pipeline.
+- [references/ffi.md](references/ffi.md): calling C and exposing a C API (verified in both directions), `-sys` crates, bindings and headers, linking, testing.
 - `scripts/audit_rust.py`: scans a crate or workspace for the mechanical rule breaks above. `--json` for machine output, `--strict` to fail on warnings, `--cargo` to also run fmt, clippy and tests.
 
 Sources: the code-quality rules adapt ideas from NASA/JPL's "Power of Ten" rules for safety-critical code (Holzmann, 2006), the Rust API Guidelines, the Rust Design Patterns book's idioms and anti-patterns, and the Clippy lint documentation. The GUI, service and firmware material draws on the wgpu, winit and tokio documentation and changelogs and the Rust Embedded Book. All code here was written for this skill and compiled against the versions named in each reference.

@@ -99,6 +99,9 @@ panic = "abort"              # no unwinding tables; a panic is a bug, so fail fa
 overflow-checks = true       # see "Arithmetic" below
 debug = "line-tables-only"   # usable backtraces and profiles at little size cost
 
+[profile.dev]
+debug = "line-tables-only"   # faster incremental builds; backtraces keep file:line (see workspace.md, "Fast builds")
+
 [profile.dev.package."*"]
 opt-level = 2                # optimized dependencies keep debug builds of GUI apps and games usable
 

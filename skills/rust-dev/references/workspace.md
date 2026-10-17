@@ -95,6 +95,24 @@ Rules:
 - **The binary crate is thin.** It parses arguments and config, builds the pieces, connects them, and maps errors to exit codes. Logic in `main.rs` can't be tested or reused.
 - **Internal APIs stay `pub(crate)`** inside each crate. Only what other crates use is `pub`.
 
+## Fast builds
+
+Build time is development time: every second in the edit-compile-test loop is paid hundreds of times a day. Measure before changing anything (`cargo build --timings` writes an HTML report of what compiled when, and what blocked what), then apply what helps:
+
+- **Split crates along the edit path.** Editing a leaf crate recompiles only it and what depends on it. A large crate that everything depends on and that changes often is the most common cause of slow incremental builds.
+- **Line tables instead of full debug info in dev builds:** `[profile.dev] debug = "line-tables-only"` (in the profile block in [code-standards.md](code-standards.md)). Backtraces keep file and line numbers, and debuggers still step by line, but there's less debug info to generate and link. Measured on the rust-gui skill's skeleton (wgpu, winit, about 300 crates): an incremental rebuild went from 1.54 s to 1.08 s. When you need to inspect variables in a debugger, build with `CARGO_PROFILE_DEV_DEBUG=true` for that session.
+- **Optimized dependencies, unoptimized own code:** `[profile.dev.package."*"] opt-level = 2` makes the first build slower but keeps debug builds of heavy apps usable, and dependencies rarely recompile.
+- **The linker:** on x86_64 Linux, Rust 1.90 and later already link with the bundled LLD, which is fast. `mold` can be faster still on very large binaries. Try it only when `--timings` shows linking as the bottleneck, through `.cargo/config.toml`:
+
+  ```toml
+  [target.x86_64-unknown-linux-gnu]
+  linker = "clang"
+  rustflags = ["-C", "link-arg=-fuse-ld=mold"]
+  ```
+- **Few proc macros and build scripts.** Each proc-macro crate (`serde_derive` and friends) compiles before anything that uses it and can't be parallelized away. Each build script runs on every clean build. The dependency rules already keep these down.
+- **Check, don't build, while editing.** `cargo check` (what rust-analyzer runs) skips code generation entirely. Run `cargo test -p <crate>` for the crate being changed, and the whole workspace before pushing.
+- **CI:** cache `~/.cargo/registry`, `~/.cargo/git` and `target/`, keyed on `Cargo.lock`, the toolchain version and the OS. For large projects with many CI machines, `sccache` (`RUSTC_WRAPPER=sccache`) shares compiled dependencies between them. It doesn't help local incremental builds, so it's a CI tool.
+
 ## Commands
 
 ```bash

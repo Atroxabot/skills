@@ -1,6 +1,46 @@
 # Verification
 
-The compiler and Clippy catch a lot, and tests catch behavior. At this bar each kind of risk gets the tool that's good at finding it:
+Verification has to catch real bugs without slowing development down. A tool that adds minutes to every change gets skipped or resented, and then it protects nothing. So checks are tiered by cost: the cheap ones run on every change, the full suite runs in CI where nobody waits on it, and the expensive ones run only when a change actually needs them.
+
+## Contents
+- When each check runs
+- What each tool is for
+- Tests
+- Property tests (verified example)
+- Fuzzing
+- Miri and sanitizers
+- Benchmarks (verified example)
+- The CI pipeline
+
+## When each check runs
+
+| Tier | When | What | Time budget |
+|---|---|---|---|
+| **1. While working** | Every change, locally, before committing | `cargo fmt`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test -p <crates you changed>` (property tests included), the audit script | Seconds on an incremental build. If it takes over a minute, fix the build or the tests (see below), not the habit |
+| **2. Every pull request** | In CI, automatically | Tier 1 for the whole workspace, `cargo deny check`, `cargo doc` | Minutes, but nobody waits on it. Developers keep working |
+| **3. Only when it applies** | Triggered by what changed, not routine | The rows below | Run once for the change, not on every edit |
+
+Tier 3, with the trigger for each:
+
+| Check | Run it when | Skip it when |
+|---|---|---|
+| Miri | Unsafe code, or a contract that unsafe code relies on, changed | No unsafe code changed. Most changes |
+| AddressSanitizer / ThreadSanitizer (or valgrind) | Unsafe, FFI or lock-free code changed | Same |
+| Fuzzing | A parser of untrusted input was added or changed: add or update its target and run it for a few minutes locally. Long runs happen on a nightly or weekly CI schedule | The change doesn't touch input parsing |
+| Benchmarks | A hot path changed, or someone claims a speedup | The code isn't on a measured hot path |
+| `cargo semver-checks` | Releasing a library | Applications; unreleased changes |
+
+**The toolset is closed.** These are all the verification tools a project uses by default. Adding another (mutation testing, model checkers, coverage gates, more linters, a second test runner) needs a reason, the same way a dependency does: a specific kind of bug the current set misses, and evidence that the tool would have caught it. More tools mean slower builds, more configuration and more CI time, and past a point they find little the existing set doesn't.
+
+### Keeping tier 1 fast
+
+- **Unit tests run in milliseconds.** Tests that need a GPU, network, large data or real time are few, live in their own integration test file, and are the only slow part of the suite.
+- **A crate's `cargo test` stays under about 10 seconds.** When it doesn't, find the slow tests and shrink their inputs, or move them into an integration test file in `tests/` and iterate with `cargo test -p <crate> --lib`, which runs only the unit tests. CI still runs everything.
+- **Property tests use proptest's default case count (256) locally.** The scheduled CI job can raise it (`PROPTEST_CASES=10000`) where more cases are worth the time.
+- **Test only the crates you changed** while working. The workspace layout makes that possible ([workspace.md](workspace.md)), and CI runs everything.
+- **Build speed is test speed.** The settings in [workspace.md](workspace.md) ("Fast builds") apply to every tier.
+
+## What each tool is for
 
 | Risk | Tool |
 |---|---|
@@ -12,14 +52,6 @@ The compiler and Clippy catch a lot, and tests catch behavior. At this bar each 
 | Performance regressions | Benchmarks (`criterion`) |
 | Vulnerable, unlicensed or banned dependencies | `cargo deny` |
 | Accidental breaking changes (libraries) | `cargo semver-checks` |
-
-## Contents
-- Tests
-- Property tests (verified example)
-- Fuzzing
-- Miri and sanitizers
-- Benchmarks (verified example)
-- The CI pipeline
 
 ## Tests
 
@@ -155,23 +187,32 @@ harness = false
 
 ## The CI pipeline
 
-In order, failing fast on the cheap checks:
+Every pull request (tier 2), failing fast on the cheap checks:
 
 ```bash
 cargo fmt --all --check
-cargo clippy --workspace --all-targets --all-features -- -D warnings
-cargo test --workspace --all-features
-cargo test --workspace --doc
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+cargo test --workspace --all-features --locked          # includes doctests
 cargo deny check
 python3 <path-to-skill>/scripts/audit_rust.py . --strict
-RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
-# when unsafe code exists:
-cargo +nightly miri test -p <crates-with-unsafe>
-# libraries, before release:
-cargo semver-checks
-# scheduled (nightly CI job):
-cargo +nightly fuzz run <target> -- -max_total_time=600    # per target
-cargo bench                                                 # against the stored baseline
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --locked
 ```
 
-Build with `--locked` in CI so a `Cargo.lock` that doesn't match `Cargo.toml` fails instead of being silently updated. Cache `~/.cargo/registry` and `target/` between runs, keyed on `Cargo.lock` and the toolchain version.
+Only when the pull request touches the relevant code (tier 3). CI can decide this from the changed paths, or the author runs it and says so in the PR:
+
+```bash
+cargo +nightly miri test -p <crate-with-changed-unsafe>
+cargo +nightly fuzz run <changed-parser-target> -- -max_total_time=300
+cargo bench -p <crate> -- --baseline main
+```
+
+On a schedule (nightly or weekly), never per push:
+
+```bash
+cargo +nightly fuzz run <target> -- -max_total_time=600       # each target
+PROPTEST_CASES=10000 cargo test --workspace --release
+```
+
+At release (libraries): `cargo semver-checks`.
+
+`--locked` makes CI fail when `Cargo.lock` doesn't match `Cargo.toml`, instead of silently updating it. Cache `~/.cargo/registry`, `~/.cargo/git` and `target/` between runs, keyed on `Cargo.lock`, the toolchain version and the OS.

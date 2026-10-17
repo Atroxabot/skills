@@ -74,7 +74,7 @@ The details and reasons are in [references/rendering.md](references/rendering.md
 1. Check current wgpu and winit versions (above). Copy `references/skeleton/`, rename the crates and the window title.
 2. Decide up front, and write down: target platforms, whether screen reader support is needed ([references/ui.md](references/ui.md), Accessibility), which text stack (`fontdue` for simple scripts, `cosmic-text` for any language or rich text), and the frame-time budget.
 3. Build features in `app-core` first (state, layout, draw list), with tests, then extend `app-render` only when a new kind of primitive is needed (glyphs, images, rounded rectangles).
-4. Keep the skeleton's checks passing: lints, tests including the offscreen render test, `cargo deny check`, and rust-dev's audit script.
+4. Keep the skeleton's checks passing, tiered as rust-dev describes: lints, tests and the audit script on every change (the offscreen render test takes about a quarter of a second), `cargo deny check` and the full suite in CI.
 
 ### Adding a widget or feature
 1. State and behavior go in `app-core`, with unit tests. Input that comes from the OS (keys, IME, clipboard, files) is converted to plain values in `app` and handed to `app-core`.

@@ -67,7 +67,7 @@ ALLOWED = {
     # security
     "ring", "sha2", "hmac", "blake3", "subtle",
     # data, observability, CLI
-    "serde", "serde_json", "tracing", "tracing-subscriber", "lexopt",
+    "serde", "serde_json", "zerocopy", "tracing", "tracing-subscriber", "lexopt",
     # embedded
     "cortex-m", "cortex-m-rt", "embedded-hal", "embedded-hal-async",
     "embedded-io", "critical-section", "heapless", "defmt", "defmt-rtt",

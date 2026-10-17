@@ -9,6 +9,7 @@ Performance comes from design decisions made early (data layout, allocation stra
 - Dispatch, inlining and generics
 - Bounds checks and vectorization
 - Hashing, strings, I/O
+- Zero-copy parsing of binary formats
 - SIMD
 - Build settings
 - Profiling and benchmarking tools
@@ -61,6 +62,93 @@ Performance comes from design decisions made early (data layout, allocation stra
 - Strings: build into a reused `String` with `write!`, not repeated `format!`. Work on `&str` slices and bytes. Avoid `to_string()` in loops. Compare and hash interned ids, not strings, in hot paths.
 - I/O: wrap files and sockets in `BufReader`/`BufWriter`, lock `stdout` once per batch of writes, and read in large chunks. Stream input instead of loading whole files when inputs can be large. `memmap2` (with a `# why:`) for random access into large read-only files. Mapping is an unsafe call (another process can change the file underneath), so it goes through the unsafe rule.
 - Parsing: parse from `&[u8]` without copying, and validate UTF-8 once at the boundary, not per field.
+
+## Zero-copy parsing of binary formats
+
+For binary protocols and file formats, view the input bytes as typed structs instead of copying fields out one by one. `zerocopy` (on the allowlist) does this without unsafe: its derives check at compile time that a struct has no padding and accepts any bit pattern, and its byte-order types (`U16<BigEndian>`) make endianness part of the type, so a field can't be read in the wrong byte order by accident. `bytemuck` stays the choice for GPU data, where the wgpu ecosystem uses it. `zerocopy` is for parsing input we don't trust.
+
+This module compiles under the lint set in [code-standards.md](code-standards.md). Its tests, including a property test that arbitrary bytes never cause a panic, pass:
+
+```rust
+//! Zero-copy parsing of a binary frame header from untrusted bytes.
+
+use core::fmt;
+
+use zerocopy::byteorder::{BigEndian, U16, U32};
+use zerocopy::{FromBytes, Immutable, IntoBytes, KnownLayout, Unaligned};
+
+/// The wire header, exactly as it appears in the byte stream: big-endian fields,
+/// no padding, alignment 1. The derives check all of that at compile time, so viewing
+/// bytes as a `Header` needs no unsafe and no copy.
+#[derive(FromBytes, IntoBytes, KnownLayout, Immutable, Unaligned, Debug)]
+#[repr(C)]
+pub struct Header {
+    pub magic: [u8; 4],
+    pub version: u8,
+    pub kind: u8,
+    pub len: U16<BigEndian>,
+    pub seq: U32<BigEndian>,
+}
+
+const MAGIC: [u8; 4] = *b"RSTP";
+
+/// Why a frame was rejected.
+#[derive(Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum FrameError {
+    TooShort { available: usize },
+    BadMagic([u8; 4]),
+    Truncated { needed: usize, available: usize },
+}
+
+impl fmt::Display for FrameError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::TooShort { available } => write!(
+                f,
+                "frame too short for a header: {available} of {} bytes",
+                size_of::<Header>()
+            ),
+            Self::BadMagic(magic) => write!(f, "bad magic bytes {magic:02x?}"),
+            Self::Truncated { needed, available } => {
+                write!(
+                    f,
+                    "payload truncated: need {needed} bytes, have {available}"
+                )
+            }
+        }
+    }
+}
+
+impl std::error::Error for FrameError {}
+
+/// Splits one frame off the front of `buf`: the header (borrowed, not copied), its
+/// payload, and the bytes after it.
+///
+/// # Errors
+///
+/// Returns [`FrameError`] if `buf` is too short, the magic doesn't match, or the
+/// payload is shorter than the header's length field says.
+pub fn parse_frame(buf: &[u8]) -> Result<(&Header, &[u8], &[u8]), FrameError> {
+    let (header, rest) = Header::ref_from_prefix(buf).map_err(|_| FrameError::TooShort {
+        available: buf.len(),
+    })?;
+    if header.magic != MAGIC {
+        return Err(FrameError::BadMagic(header.magic));
+    }
+    let len = usize::from(header.len.get());
+    let (payload, tail) = rest.split_at_checked(len).ok_or(FrameError::Truncated {
+        needed: len,
+        available: rest.len(),
+    })?;
+    Ok((header, payload, tail))
+}
+```
+
+What to copy from it:
+- **Validate in the order the bytes are trusted:** size first (`ref_from_prefix` fails on short input), then magic and version, then lengths taken from the header against the bytes actually present (`split_at_checked`). A length field is attacker-controlled until checked.
+- **Borrow, don't copy:** the header and payload are views into the input buffer. Copy only what must outlive it.
+- **Every parser of untrusted input gets a fuzz target** ([verification.md](verification.md)), on top of the property test.
 
 ## SIMD
 
