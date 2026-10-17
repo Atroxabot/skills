@@ -19,7 +19,7 @@
     },
     {
       "name": "engineering-skills",
-      "description": "Skills for engineering work: directive, agent-ready implementation specs, checking and fixing a domain's email authentication (SPF, DKIM, DMARC), the structure and code standards for React Router web apps, and high-assurance, high-performance Rust (wgpu GUIs, CLIs, services, libraries, firmware)",
+      "description": "Skills for engineering work: directive, agent-ready implementation specs, checking and fixing a domain's email authentication (SPF, DKIM, DMARC), the structure and code standards for React Router web apps, and idiomatic, high-assurance, high-performance Rust (wgpu GUIs, CLIs, services, libraries, firmware)",
       "source": "./",
       "strict": false,
       "skills": [

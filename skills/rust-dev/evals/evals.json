@@ -47,6 +47,7 @@
         "Flags blocking calls (thread::sleep, std::fs) inside async code",
         "Flags tokio \"full\" and/or the edition 2021 setting",
         "Notes missing timeouts or the missing dependency justification for reqwest",
+        "Points out non-idiomatic code, such as the redundant closure in Lazy::new(|| reqwest::Client::new()) or slicing by index instead of using get or iterators",
         "Orders findings by severity with correctness and panics first"
       ]
     },

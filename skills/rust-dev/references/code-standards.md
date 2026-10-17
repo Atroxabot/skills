@@ -4,6 +4,7 @@ The configuration below has been compiled against Rust 1.97 with a wgpu/winit ap
 
 ## Contents
 - Files to copy: toolchain, lints, clippy.toml, profiles
+- Idiomatic Rust
 - The panic rule in practice
 - The unsafe rule in practice
 - Arithmetic and casts
@@ -107,6 +108,51 @@ debug = true                 # full symbols for profiling benchmarks
 ```
 
 `panic = "abort"` is right for binaries. A library doesn't choose this: the profile of the final binary decides.
+
+## Idiomatic Rust
+
+Idiomatic code uses the language's tools for what they're for, so other Rust developers can read it without stopping to decode it. It's rarely a trade-off against the other two parts of the bar. The idiomatic form is usually also the safe one (no index to get wrong, no sentinel to forget) and the fast one (iterators drop bounds checks, borrows avoid copies, enums replace runtime checks). `clippy::pedantic` catches many non-idiomatic forms. The rest are on the author and the reviewer.
+
+| Instead of | Write |
+|---|---|
+| `for i in 0..v.len() { ... v[i] ... }` | `for x in &v`, `.iter().enumerate()`, `.zip()`, `.windows(2)`, `.chunks_exact(n)` |
+| A `mut` vector filled by a loop | `.iter().map(...).collect()`, `filter_map`, `extend`, `fold` when it reads better than the loop |
+| `collect()` into a `Vec` just to iterate it again | Keep the iterator lazy and chain on it, or return `impl Iterator` |
+| `match r { Ok(v) => v, Err(e) => return Err(e.into()) }` | `r?`, or `r.map_err(\|e\| Error::Read { path, source: e })?` to add context |
+| `if x.is_some() { let v = x.unwrap(); ... }` | `if let Some(v) = x`, or `let Some(v) = x else { return ... };` |
+| Nested `match` on `Option`/`Result` | Combinators: `map`, `and_then`, `ok_or_else`, `unwrap_or_default`, `is_some_and`, `transpose` |
+| Sentinel values (`-1`, `""`, `0` meaning "none") | `Option<T>` |
+| `bool` parameters: `draw(true, false)` | Enums that name the choice: `draw(Fill::Solid, Vsync::Off)` |
+| Strings for state or kind (`"open"`, `"closed"`) | An `enum` |
+| `match` on our own enum with `_ =>` | List every variant, so adding one is a compile error at every place that has to handle it |
+| `&Vec<T>`, `&String`, `&Box<T>` parameters | `&[T]`, `&str`, `&T` |
+| `.clone()` to get past the borrow checker | Restructure: shorter borrows, borrow separate fields, `std::mem::take` / `replace`, pass ownership on purpose |
+| `if map.contains_key(&k) { ... } else { map.insert(k, v) }` | The entry API: `*map.entry(k).or_default() += 1` |
+| `fn to_celsius(f: Fahrenheit)`, `fn parse_port(s: &str)` | `impl From<Fahrenheit> for Celsius`, `impl TryFrom<u32> for Port`, `impl FromStr for Port` |
+| A `to_string()` or `print()` method | `impl Display` |
+| `fn new() -> Self` with no arguments and nothing else | `#[derive(Default)]` or `impl Default`, plus `new` calling it if callers expect one |
+| Hand-written `Debug`, `Clone`, `PartialEq`, `Hash` that a derive would produce | `#[derive(...)]` |
+| A getter and setter for every field | Public fields on plain data, or methods that express operations (`account.deposit(amount)`), not field access |
+| `Deref` to emulate inheritance | Composition plus traits. `Deref` is for smart pointers and pointer-like wrappers only |
+| Object graphs of `Rc<RefCell<T>>` | One owner, `&mut` passed down, or an arena of `T` with typed index handles |
+| A trait with a single implementation "for testability" | A concrete type. Introduce the trait when a second implementation exists (a test double counts if it's actually used) |
+| Explicit cleanup calls (`close()`, `unlock()`) | RAII: the guard or handle releases in `Drop` |
+| `return x;` as a function's last line | The tail expression `x` |
+| `if cond { true } else { false }`, `x == true` | `cond`, `x` |
+| `match x { Foo::A => true, _ => false }` | `matches!(x, Foo::A)` |
+| Builders that mutate through `&mut self` and return `()` | Methods that take and return `self`, so calls chain, ending in a `build()` that validates |
+| `as` for conversions | `From` / `TryFrom` (see "Arithmetic and casts") |
+
+More idioms that apply everywhere:
+- **Shadowing for a transformed value** (`let input = input.trim();`) instead of inventing `input2` or `trimmed_input`.
+- **Implement std traits so types work with the ecosystem:** `IntoIterator` (for `&T` too) on collections, `FromIterator` and `Extend` on things that can be built from items, `AsRef`/`Borrow` where a type wraps one, `Error` on errors, `Hash`/`Eq`/`Ord` when the type is a key.
+- **`impl Trait` in argument position** for a simple generic parameter, a `where` clause once the bounds no longer fit on one line.
+- **Modules as `name.rs` plus a `name/` folder**, not `name/mod.rs`, which leaves many editor tabs called `mod.rs`. One style per crate.
+- **Follow the Rust API Guidelines** for naming and conversions (see "Naming, comments and docs" below).
+- **`Option<&T>` instead of `&Option<T>`** in signatures (`opt.as_ref()`), and `Option<Box<T>>` only when the box is really needed.
+- **Iterator methods that state intent** (`any`, `all`, `position`, `find_map`, `sum`, `max_by_key`) instead of loops with flags.
+
+When the idiomatic form and a measured hot path disagree (rare: for example, a manual loop the compiler vectorizes where the iterator chain doesn't), the measured version wins, with a comment and the benchmark that justified it.
 
 ## The panic rule in practice
 
@@ -212,4 +258,5 @@ These come from the same thinking as NASA/JPL's "Power of Ten" rules for safety-
 6. **Performance:** no allocation, locking or dynamic dispatch in hot loops; data layout fits the access pattern; claims have benchmarks.
 7. **Dependencies:** each new crate is on the allowlist or has a `# why:`; no banned crates.
 8. **Tests:** new behavior and every fixed bug are tested; parsers have fuzz targets; invariants have property tests.
-9. **Structure:** functions small, names meaningful, visibility minimal, comments explain why.
+9. **Idioms:** no clones to satisfy the borrow checker, no index loops where iterators fit, enums instead of flags, strings or sentinels, std traits instead of ad-hoc methods.
+10. **Structure:** functions small, names meaningful, visibility minimal, comments explain why.

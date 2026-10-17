@@ -210,7 +210,17 @@ Hand-written lock-free structures are unsafe code under the unsafe rule: a dedic
 ## Shared state and locks
 
 - Prefer ownership and message passing to shared mutable state. When state is shared, prefer a few coarse, short critical sections to many fine-grained locks.
-- `std::sync::Mutex` and `RwLock` are fast (futex-based) and the right default. `parking_lot` needs a measured reason.
+- **`std::sync::Mutex` and `RwLock` are the default.** Since Rust 1.62 they're futex-based on Linux: small, fast when uncontended, and `const`-constructible, so they work in `static`s.
+- **`parking_lot`** (`Mutex`, `RwLock`, `Condvar`, `ReentrantMutex`) used to be the standard faster replacement. Since std's locks were rewritten, speed alone is no longer a reason, so it needs a `# why:` naming something std doesn't offer:
+  - upgradable read locks (`RwLock::upgradable_read`), for read-mostly data that is sometimes updated after inspection
+  - timed acquisition (`try_lock_for`, `try_lock_until`), so a lock wait can't block forever
+  - fair unlocking (`unlock_fair`), when one thread re-locking in a loop would starve the others
+  - the `deadlock_detection` feature in debug builds, while chasing a deadlock
+  - a benchmark on the target platform showing a real difference under the program's contention
+
+  Its locks don't poison, which is irrelevant to us: with `panic = "abort"`, std's locks can't be poisoned either. Don't mix both kinds of lock in one crate without a reason, since readers then have to check which semantics apply.
+- **No spin locks** (the `spin` crate or hand-written ones) in code that runs on an OS. A spinning waiter burns its time slice while the holder may be descheduled. The hot threads in this skill busy-poll *lock-free ring buffers*, which is different: nobody holds anything the poller waits on. In `no_std` firmware, use `critical-section` ([embedded.md](embedded.md)).
+- **No lock at all on a hot path.** Even an uncontended lock is an atomic read-modify-write, and a contended one can park the thread. Hot paths get data through ring buffers or own it outright.
 - Poisoning: with `panic = "abort"` a lock can't be poisoned, so `.lock().unwrap_or_else(PoisonError::into_inner)` is the idiom that satisfies the no-panic rule.
 - Never hold a lock while calling unknown code (callbacks, trait objects from elsewhere): that's how deadlocks happen. Copy what you need, release, then call.
 - Lock order is documented when more than one lock can be held at once.

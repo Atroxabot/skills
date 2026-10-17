@@ -4,7 +4,7 @@ Every crate we depend on is code we ship without reviewing, a supply-chain entry
 
 ## The process
 
-1. **Check `std` first.** It covers more than people remember: `LazyLock`/`OnceLock` (instead of `lazy_static`, `once_cell`), `std::io::IsTerminal` (instead of `atty`), `std::sync::mpsc` including bounded `sync_channel` (instead of `crossbeam-channel` off the hot path), `std::thread::scope`, `std::hash::DefaultHasher`, `std::num::NonZero*`, `std::time`, `std::path`, `std::process`, `std::net`, `std::fs`, `std::os::*`, `std::arch` with runtime feature detection.
+1. **Check `std` first.** It covers more than people remember: `LazyLock`/`OnceLock` (instead of `lazy_static`, `once_cell`), `Mutex`/`RwLock` (usually instead of `parking_lot`), `std::io::IsTerminal` (instead of `atty`), `std::sync::mpsc` including bounded `sync_channel` (instead of `crossbeam-channel` off the hot path), `std::thread::scope`, `std::hash::DefaultHasher`, `std::num::NonZero*`, `std::time`, `std::path`, `std::process`, `std::net`, `std::fs`, `std::os::*`, `std::arch` with runtime feature detection.
 2. **Check whether it's small enough to write.** A 50-line function you own beats a crate with 30 transitive dependencies: an argument splitter, a CRC, a ring of fixed size, a `CachePadded` wrapper (`#[repr(align(128))] struct CachePadded<T>(T);`), a hex encoder.
 3. **Use the allowlist** below for the job it names.
 4. **Anything else needs a `# why:` comment** on its line in `Cargo.toml`, written after doing the evaluation in the next section:
@@ -79,6 +79,7 @@ Pre-vetted but conditional. These still need a `# why:` that names the measureme
 - `foldhash` or `rustc-hash`: a faster hasher for `HashMap`s with keys that aren't attacker-controlled, after a profile shows hashing in a hot path. The std hasher (SipHash) is slower on purpose: it resists hash-flooding attacks, so keys from the network keep it.
 - `clap`: only when a CLI needs generated shell completions or a large tree of subcommands that `lexopt` makes unwieldy.
 - `jiff`: time zones and calendar arithmetic.
+- `parking_lot`: only for a feature std's locks lack (upgradable read locks, timed lock attempts, fair unlocking, deadlock detection while debugging) or a benchmark showing a gain under real contention. std's `Mutex` and `RwLock` are futex-based on Linux since Rust 1.62, so "it's faster" without numbers isn't a reason. See [concurrency.md](concurrency.md).
 
 ## Banned
 

@@ -1,15 +1,16 @@
 ---
 name: rust-dev
-description: Standards for writing, structuring and reviewing high-assurance, high-performance Rust. No unwrap, expect or panics outside tests, audited unsafe, strict Clippy lints, edition 2024 on stable, Cargo workspaces for larger projects, hand-written error types (never thiserror or anyhow), and a dependency allowlist where any other crate needs a written reason. GUI apps render with raw wgpu and winit and a hand-built UI, never a GUI framework. Async only when the workload needs it; latency-critical paths use pinned hot threads and ring buffers. Covers CLI tools, services, libraries and no_std firmware, plus benchmarks, proptest, fuzzing, Miri, sanitizers and cargo-deny, with an audit script. Use when the user asks to start, scaffold, write, refactor, review, optimize or debug Rust code, a Cargo project, crate or workspace, a CLI, server, daemon, library, firmware, game, renderer or desktop app in Rust, add a dependency, handle errors, use wgpu, winit or WGSL, write unsafe or concurrent code, or make Rust faster.
+description: Standards for writing, structuring and reviewing idiomatic, high-assurance, high-performance Rust. No unwrap, expect or panics outside tests, audited unsafe, strict Clippy lints, edition 2024 on stable, Cargo workspaces for larger projects, hand-written error types (never thiserror or anyhow), and a dependency allowlist where any other crate needs a written reason. GUI apps render with raw wgpu and winit and a hand-built UI, never a GUI framework. Async only when the workload needs it; latency-critical paths use pinned hot threads and ring buffers. Covers CLI tools, services, libraries and no_std firmware, plus benchmarks, proptest, fuzzing, Miri, sanitizers and cargo-deny, with an audit script. Use when the user asks to start, write, refactor, review, optimize or debug Rust code, a Cargo project, crate or workspace, a CLI, server, daemon, library, firmware, game, renderer or desktop app in Rust, add a dependency, handle errors, use wgpu, winit or WGSL, write unsafe or concurrent code, or make Rust faster.
 ---
 
 # Rust development
 
 This skill sets how Rust code is written in our projects: the toolchain, the project layout, the code-quality bar, error handling, dependencies, concurrency, performance and verification, plus specific guidance for each kind of application. It applies to new code, changes to existing code, and reviews.
 
-The bar has two halves, and neither one is traded away for the other:
+The bar has three parts, and none of them is traded away for another:
 
 - **High-assurance quality.** Code that a strict reviewer on a safety-critical project would accept: no hidden panics, every failure handled or propagated with context, unsafe code isolated and justified, every rule enforced by a tool where a tool can enforce it. Bugs caught by the compiler and Clippy cost seconds. Bugs caught in production cost incidents.
+- **Idiomatic Rust.** Code that experienced Rust developers read without stopping: ownership and borrowing instead of clones, iterators instead of index loops, `?` and pattern matching instead of nested checks, enums instead of flags and sentinel values, std traits (`From`, `TryFrom`, `Default`, `Display`, `FromStr`, `IntoIterator`) instead of ad-hoc methods, and the Rust API Guidelines for naming. Code that fights the language is harder to review and usually slower too, because iterators drop bounds checks and borrows avoid copies. The idioms, with the non-idiomatic forms they replace, are in [references/code-standards.md](references/code-standards.md#idiomatic-rust).
 - **Very high performance.** Performance is designed in (data layout, allocation, threading model) and then measured. It's not something sprinkled on at the end with `#[inline]`. A claim that code is fast needs a benchmark behind it.
 
 When a rule here conflicts with an existing project's established convention, point out the conflict and ask before changing it. Don't silently pick one.
@@ -117,12 +118,12 @@ Commands, CI layout and what a good property or fuzz target looks like are in [r
 
 ### Reviewing Rust code
 1. Run `python3 scripts/audit_rust.py <dir>` for the mechanical problems: banned and unjustified crates, panicking calls, unsafe without SAFETY comments, `#[allow]`, an old edition, missing lint config.
-2. Then read for what a script can't see: logic errors, unhandled edge cases, error types that lose context, allocation or locking in hot paths, async where threads would do (or the reverse), unsound unsafe, API that will be hard to change.
+2. Then read for what a script can't see: logic errors, non-idiomatic code (clones to satisfy the borrow checker, index loops, flags and sentinels instead of enums, ad-hoc conversion methods instead of std traits), unhandled edge cases, error types that lose context, allocation or locking in hot paths, async where threads would do (or the reverse), unsound unsafe, API that will be hard to change.
 3. Report findings ranked by severity: soundness and correctness first, then failure handling, then performance, then structure and style. Give each one a concrete fix.
 
 ## References
 
-- [references/code-standards.md](references/code-standards.md): the lint configuration, `clippy.toml`, release profile and toolchain file to copy; the panic, unsafe and arithmetic rules in detail; types, naming, size limits, docs; review checklist.
+- [references/code-standards.md](references/code-standards.md): the lint configuration, `clippy.toml`, release profile and toolchain file to copy; idiomatic Rust; the panic, unsafe and arithmetic rules in detail; types, naming, size limits, docs; review checklist.
 - [references/workspace.md](references/workspace.md): workspace manifests, crate boundaries, shared dependencies and lints.
 - [references/errors.md](references/errors.md): hand-written error enums, `source()` chains, adding context, reporting at `main`, error types in libraries.
 - [references/dependencies.md](references/dependencies.md): the allowlist, the banned list, how to evaluate any other crate, `deny.toml`.
@@ -133,4 +134,4 @@ Commands, CI layout and what a good property or fuzz target looks like are in [r
 - [references/verification.md](references/verification.md): tests, proptest, cargo-fuzz, Miri, sanitizers, criterion, cargo-deny, the CI pipeline.
 - `scripts/audit_rust.py`: scans a crate or workspace for the mechanical rule breaks above. `--json` for machine output, `--strict` to fail on warnings, `--cargo` to also run fmt, clippy and tests.
 
-Sources: the code-quality rules adapt ideas from NASA/JPL's "Power of Ten" rules for safety-critical code (Holzmann, 2006), the Rust API Guidelines and the Clippy lint documentation. The GUI, service and firmware material draws on the wgpu, winit and tokio documentation and changelogs and the Rust Embedded Book. All code here was written for this skill and compiled against the versions named in each reference.
+Sources: the code-quality rules adapt ideas from NASA/JPL's "Power of Ten" rules for safety-critical code (Holzmann, 2006), the Rust API Guidelines, the Rust Design Patterns book's idioms and anti-patterns, and the Clippy lint documentation. The GUI, service and firmware material draws on the wgpu, winit and tokio documentation and changelogs and the Rust Embedded Book. All code here was written for this skill and compiled against the versions named in each reference.
