@@ -1,0 +1,18 @@
+[package]
+name = "app-render"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+app-core.workspace = true
+bytemuck.workspace = true
+wgpu.workspace = true
+
+[dev-dependencies]
+naga.workspace = true
+pollster.workspace = true
+
+[lints]
+workspace = true

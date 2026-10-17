@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "A curated set of Agent Skills for Claude from atroxabot.com",
-    "version": "1.3.0"
+    "version": "1.4.0"
   },
   "plugins": [
     {
@@ -19,13 +19,15 @@
     },
     {
       "name": "engineering-skills",
-      "description": "Skills for engineering work: directive, agent-ready implementation specs, checking and fixing a domain's email authentication (SPF, DKIM, DMARC), and the structure and code standards for React Router web apps",
+      "description": "Skills for engineering work: directive, agent-ready implementation specs, checking and fixing a domain's email authentication (SPF, DKIM, DMARC), the structure and code standards for React Router web apps, idiomatic, high-assurance, high-performance Rust (CLIs, services, libraries, firmware), and Rust GUI apps on raw wgpu and winit",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/spec-writer",
         "./skills/email-dns-auth",
-        "./skills/webapp-architecture"
+        "./skills/webapp-architecture",
+        "./skills/rust-dev",
+        "./skills/rust-gui"
       ]
     },
     {

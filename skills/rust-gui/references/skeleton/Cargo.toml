@@ -1,0 +1,73 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.97"
+version = "0.1.0"
+publish = false
+
+[workspace.dependencies]
+app-core = { path = "crates/app-core" }
+app-render = { path = "crates/app-render" }
+arboard = { version = "3.7", default-features = false, features = ["wayland-data-control"] }
+bytemuck = { version = "1.25", features = ["derive"] }
+naga = { version = "30", features = ["wgsl-in"] }
+pollster = "1.0"
+proptest = "1.12"
+rfd = "0.17"
+unicode-segmentation = "1.13"
+wgpu = "30"
+winit = "0.30"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+missing_debug_implementations = "warn"
+unreachable_pub = "warn"
+unused_must_use = "deny"
+unused_qualifications = "warn"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+unreachable = "deny"
+indexing_slicing = "deny"
+string_slice = "deny"
+dbg_macro = "deny"
+exit = "deny"
+mem_forget = "deny"
+let_underscore_must_use = "deny"
+undocumented_unsafe_blocks = "deny"
+multiple_unsafe_ops_per_block = "deny"
+allow_attributes = "deny"
+allow_attributes_without_reason = "deny"
+await_holding_lock = "deny"
+clone_on_ref_ptr = "deny"
+rc_buffer = "deny"
+float_cmp_const = "deny"
+lossy_float_literal = "deny"
+rest_pat_in_fully_bound_structs = "deny"
+same_name_method = "deny"
+unneeded_field_pattern = "deny"
+verbose_file_reads = "deny"
+infinite_loop = "deny"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+overflow-checks = true
+debug = "line-tables-only"
+
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+opt-level = 2
