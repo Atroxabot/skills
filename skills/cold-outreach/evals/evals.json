@@ -1,0 +1,66 @@
+{
+  "skill_name": "cold-outreach",
+  "evals": [
+    {
+      "id": 1,
+      "name": "outreach-oakline",
+      "prompt": "write a cold email + 2 follow ups. I run a small agency (Ruiz Studio) that builds Shopify stores for furniture brands. target: Marcus Lee, head of ecommerce at Oakline Furniture. they launched a new outdoor collection last week and their mobile site is slow (PageSpeed mobile score 31, I checked). we rebuilt Birchwood Home's store and their conversion went from 2.1% to 3.4%. I'm Ana Ruiz. we're in the US, so is Oakline.",
+      "expected_output": "A first email of 50-100 words with a short, honest subject; a first line about Oakline (the launch and the PageSpeed score of 31); one proof point (Birchwood 2.1% to 3.4%); one interest ask; no calendar link; an opt-out line and a postal-address placeholder. Two follow-ups, each with a new angle and the footer, labelled with send days, without 'just checking in'. Nothing invented.",
+      "files": [],
+      "assertions": [
+        "The first email's message is 50-100 words, not counting the sign-off and footer",
+        "The subject line is 2-5 words, with no fake 'Re:' and no 'Quick question'",
+        "The first line is about Oakline (the outdoor launch or PageSpeed 31), not about Ana or Ruiz Studio",
+        "Uses the Birchwood 2.1% to 3.4% result and invents no other customers, numbers or facts about Oakline",
+        "Ends with one interest question, not a meeting request or calendar link",
+        "Every email, follow-ups included, has a plain opt-out line and a postal address or a placeholder for one",
+        "The follow-ups are labelled with send days, each adds a new angle, and none says 'just checking in', 'bumping' or 'circling back'"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "outreach-fix-draft",
+      "prompt": "nobody is replying to this, what's wrong with it? we've sent it to about 2,000 people\n\nSubject: Re: Quick question!!\n\nHi {first_name},\n\nI hope this email finds you well! My name is Jordan and I'm the founder of Stackwise, a revolutionary, best-in-class AI-powered platform that helps companies streamline their operations, unlock efficiency and drive growth.\n\nWe work with industry-leading companies to leverage cutting-edge technology and deliver seamless experiences. Our clients typically see a 10x ROI.\n\nI'd love to find 30 minutes on your calendar to walk you through a demo. Here's my Calendly: https://calendly.com/jordan-stackwise/30min\n\nI've also attached our deck for your review.\n\nBest,\nJordan",
+      "expected_output": "A diagnosis that quotes the problems (fake 'Re:' and 'Quick question' subject with exclamation marks, generic opener and self-introduction, buzzwords, unsupported 10x ROI, meeting ask with a Calendly link, attachment, no opt-out, nothing about the recipient) and points at the 2,000-person list as a likely cause. A rewrite of 50-100 words with an honest subject, a placeholder for a specific observation about the recipient, one ask, an opt-out line, and no invented customers or results; it asks Jordan for a real proof point instead of keeping or inventing one.",
+      "files": [],
+      "assertions": [
+        "Flags the fake 'Re:' subject as deceptive",
+        "Flags the Calendly link and the 30-minute meeting ask, and the attachment",
+        "Flags the buzzwords and the unsupported 10x ROI claim",
+        "Mentions the list size or lack of targeting as a likely cause, not only the copy",
+        "The rewrite is 50-100 words with a short, honest subject and one interest question",
+        "The rewrite uses a marked placeholder for the recipient-specific detail instead of inventing one, and invents no customer names or results",
+        "The rewrite has an opt-out line"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "outreach-germany-linkedin",
+      "prompt": "I sell expense-reporting software (Tallyo). Want to reach Lena Fischer, head of finance at Brightwater GmbH in Berlin. She posted on LinkedIn last week that their month-end close takes 9 days. Write me a cold email and also a LinkedIn connection note in case email is a no-go. I'm Tom Becker, sales lead at Tallyo. Our customer Nordlicht Logistics cut their close from 8 days to 5.",
+      "expected_output": "A short cold email built on Lena's 9-day close post and the Nordlicht 8-to-5 result, with an interest ask and a footer that says where the address came from, links a privacy notice and offers an easy opt-out. A clear note that Germany is reported to require prior consent even for B2B cold email, so Tom should check before emailing, which makes the LinkedIn route the safer first step. A connection note of 200 characters or fewer with no pitch and no link.",
+      "files": [],
+      "assertions": [
+        "Warns that German law is reported to require consent even for B2B cold email and suggests checking before sending",
+        "The email footer says where Lena's address came from and includes or asks for a privacy-notice link",
+        "The email has a plain opt-out line",
+        "The connection note is 200 characters or fewer, with no pitch and no link",
+        "Uses only the given facts (9-day close, Nordlicht 8 to 5 days) and invents no others",
+        "Does not suggest automating LinkedIn outreach"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "outreach-mass-blast",
+      "prompt": "write me one cold email I can send to our list of 5,000 marketing managers. we sell a social media scheduling tool called Postpilot, $29/mo. make it personal sounding",
+      "expected_output": "Says plainly that one email to 5,000 people underperforms (small, targeted lists reply at more than twice the rate, and complaints put the domain at risk) and helps narrow the list, for example by a trigger or segment. Gives a template whose personal parts are marked placeholders, with one interest ask, an opt-out line and a postal-address placeholder. Doesn't fake personalization (no invented compliments or 'I saw your post' without a real post) and invents no customers or results.",
+      "files": [],
+      "assertions": [
+        "Explains with data that a 5,000-person blast underperforms small targeted lists and risks spam complaints",
+        "Suggests a concrete way to narrow or segment the list",
+        "Personal details are marked placeholders, not invented observations or fake familiarity",
+        "Invents no customer names, results or statistics about Postpilot",
+        "Has one interest ask, no calendar link, an opt-out line and a postal-address placeholder"
+      ]
+    }
+  ]
+}

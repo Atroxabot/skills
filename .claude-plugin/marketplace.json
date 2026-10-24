@@ -5,27 +5,29 @@
   },
   "metadata": {
     "description": "A curated set of Agent Skills for Claude from atroxabot.com",
-    "version": "1.4.0"
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "writing-skills",
-      "description": "Skills for editing and writing prose, starting with a humanizer that removes the patterns that make text read as AI-written",
+      "description": "Skills for writing and editing prose: a humanizer that removes the patterns that make text read as AI-written, LinkedIn posts built on the 2026 feed rules, repurposing one source into platform-native pieces, and cold outreach emails, sequences and DMs that get replies without hurting deliverability",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/humanizer"
+        "./skills/humanizer",
+        "./skills/linkedin-post",
+        "./skills/repurpose",
+        "./skills/cold-outreach"
       ]
     },
     {
       "name": "engineering-skills",
-      "description": "Skills for engineering work: directive, agent-ready implementation specs, checking and fixing a domain's email authentication (SPF, DKIM, DMARC), the structure and code standards for React Router web apps, idiomatic, high-assurance, high-performance Rust (CLIs, services, libraries, firmware), and Rust GUI apps on raw wgpu and winit",
+      "description": "Skills for engineering work: directive, agent-ready implementation specs, checking and fixing a domain's email authentication (SPF, DKIM, DMARC), idiomatic, high-assurance, high-performance Rust (CLIs, services, libraries, firmware), and Rust GUI apps on raw wgpu and winit",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/spec-writer",
         "./skills/email-dns-auth",
-        "./skills/webapp-architecture",
         "./skills/rust-dev",
         "./skills/rust-gui"
       ]
