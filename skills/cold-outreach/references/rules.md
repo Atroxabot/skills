@@ -102,6 +102,11 @@ Read this for strategy, deliverability or compliance questions, or to check why 
 | **Must include** | No misleading headers or subject lines; identify it as an ad; a valid postal address | Your identity; a valid opt-out address | Who you are and how to contact you; **where you got their data**, at the latest by the first message; their right to object | Your business name; a mailing address plus phone, email or web |
 | **Opt-out** | Clear and conspicuous; honor within 10 business days | Honor it; the right to object is absolute | Right to object (Art. 21) | Clear and prominent; honor within 10 business days |
 
+**Germany.** The Act Against Unfair Competition (UWG §7) treats advertising email sent without the recipient's prior express consent as an unacceptable nuisance, and German courts apply this to B2B email too. The narrow exception covers existing customers who bought similar products. So a cold sales email to a German business contact is risky even with a perfect footer. When the recipient is in Germany:
+- say so plainly, and suggest the sender gets the consent question checked before emailing
+- offer the LinkedIn route first: a connection note sent by hand, then a conversation, and email only once they've agreed to hear more
+- still write the email if asked, with the full EU footer, and keep the warning in the notes
+
 **In practice, every cold email footer has:**
 1. a real name and company
 2. a postal address (US and Canada)
@@ -143,6 +148,7 @@ Accessed October 2026.
 - ICO, electronic mail marketing (PECR): https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guide-to-pecr/electronic-and-telephone-marketing/electronic-mail-marketing/
 - ICO, business-to-business marketing: https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/
 - GDPR Art. 14: https://gdpr-info.eu/art-14-gdpr/
+- Germany, UWG §7: https://www.gesetze-im-internet.de/uwg_2004/__7.html
 - CASL, s. 10–11: https://laws-lois.justice.gc.ca/eng/acts/E-1.6/page-2.html
 
 **LinkedIn**

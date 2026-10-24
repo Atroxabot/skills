@@ -34,7 +34,12 @@ Good posts are made of specifics: what happened, the numbers, who was involved, 
 
 If something important is missing, ask one short round of questions. If the user wants a draft right away, write it and leave clearly marked `[placeholders]` for the missing facts. Keep placeholders to the two or three facts the post can't work without, because a draft that is mostly brackets isn't a draft. If more is missing, write the strongest version the real material supports and list the questions whose answers would improve it.
 
-**Never invent the author's experience.** Don't make up anecdotes, clients, numbers, dialogue or results and present them as true. Invented stories are what LinkedIn readers mock most, they can embarrass the user in public, and LinkedIn demotes inauthentic content. Opinions, analysis and general knowledge are fair game. What must not be invented is personal fact: events, numbers, quotes, causes, other people's reactions. When you interpret the user's material ("that was the warning sign"), stay close to what they said and flag the line in your notes so they can check it. If the user gives only a topic, choose a structure that doesn't depend on personal claims (a framework, how-to, observation or contrarian take), or use placeholders like `[the client's result]`.
+**Never invent the author's experience.** Don't make up anecdotes, clients, numbers, dialogue or results and present them as true. Invented stories are what LinkedIn readers mock most, they can embarrass the user in public, and LinkedIn demotes inauthentic content. Reasoning, analysis and general knowledge that support the author's view are fair game, but the view itself must be theirs. What must not be invented is personal fact: events, numbers, quotes, causes, other people's reactions. When you interpret the user's material ("that was the warning sign") or add reasoning of your own, stay close to what they said and flag those lines in your notes so they can check them.
+
+If the user gives only a topic:
+- **With a stance** ("why managers should stop doing status meetings"), choose a structure that doesn't depend on personal claims (a framework, how-to, observation or contrarian take) and argue it from reasoning they can stand behind. Where a skeleton asks for lines "from experience," leave them out rather than writing placeholders that presume what happened, and ask for one true detail in the notes.
+- **Without a stance** ("a post about remote work"), ask which side they're on before drafting. A post that argues both sides says nothing, and picking a side for them puts words in their mouth.
+- If the post needs a personal fact to work, use a placeholder like `[the client's result]`.
 
 ### 2. Choose the structure
 
@@ -85,7 +90,7 @@ Write three hook options from different formulas, and lead with the strongest.
 
 ### 5. End well
 
-- **Land the point in one line:** a takeaway, a TL;DR, or "Remember: ...".
+- **Land the point concretely:** an action to try, a number, or the takeaway stated plainly. Avoid the quotable one-liner ("Clarity is kindness."): an aphorism as the last line is a common machine tell.
 - **Then, optionally, ask a specific question** readers can answer from their own experience. "What's the one question you always ask in reference checks?" earns comments. "Thoughts?" and "Agree?" don't: generic closing questions perform no better than no question.
 - **Never ask for engagement.** No "comment YES," "like if you agree," "repost to help," or tagging people for attention. LinkedIn names these as engagement bait and demotes them.
 - A **P.S.** line gets read. It's a good place for the question, a soft offer, or "link in the comments."
@@ -123,10 +128,12 @@ LinkedIn doesn't render markdown. `**bold**`, `# headings` and `[links](url)` sh
 Unless the user asks for something else, return:
 
 1. **The post**, plain text, ready to paste. In a chat reply, put it in its own code block so the line breaks survive and it copies in one click.
-2. **Two alternative hooks** from different formulas (for example a story hook and a data hook), so the user can swap the opener.
-3. **Short notes**, three to five bullets at most:
+2. **Two alternative hooks** from different formulas (for example a story hook and a data hook), so the user can swap the opener. If a hook would repeat a line in the body, say which line to cut.
+3. **Short notes**, only what the user needs to act on:
    - the archetype used and the character count. If placeholders remain, give the count without them and an estimate once they're filled.
-   - any `[placeholders]` the user must fill in
+   - any `[placeholders]` to fill in, and the lines you interpreted or reasoned that they should check
+   - the assumptions behind any number you worked out from their facts ("assumes a one-hour meeting")
+   - the questions whose answers would make the post stronger, if material was missing
    - one optional improvement (an image idea, link placement, or a posting tip)
 
 If the user asks for several versions, make each a different archetype or angle, not near-copies.
@@ -147,7 +154,7 @@ Before handing over, confirm:
 
 - [ ] The hook is complete within ~140 characters, and a stranger in the target audience would click "see more"
 - [ ] The post makes one point, and the body pays off the hook
-- [ ] Every claim, number and story came from the user, or is a marked `[placeholder]`
+- [ ] Every personal fact, number and story came from the user or is a marked `[placeholder]`; numbers worked out from their facts say what they assume
 - [ ] It has at least three concrete specifics
 - [ ] None of the AI tells or engagement bait above
 - [ ] It reads aloud like the author talking

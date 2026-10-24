@@ -7,7 +7,8 @@ Usage:
     python3 lint_email.py note.txt --linkedin-note   # connection request note (200 chars)
     pbpaste | python3 lint_email.py
 
-An email may start with a line "Subject: ...". Reports word count, subject
+An email may start with a line "Subject: ...". Reports the word count of the
+message itself (greeting, sign-off, signature and footer excluded), subject
 length, links, attachments, calendar links, worn-out openers and follow-ups,
 fake Re:/Fwd:, urgency, missing opt-out, and signs of AI writing (via
 ai_signs.py; see references/ai-writing-signs.md). Warnings are prompts to
@@ -39,6 +40,11 @@ SALESY = [r"\brevolutionary\b", r"\bbest[- ]in[- ]class\b", r"\bgame[- ]chang", 
           r"\bstreamline\b", r"\bseamless(ly)?\b", r"\bturnkey\b", r"\bworld[- ]class\b", r"\bindustry[- ]leading\b",
           r"\b\d+x roi\b", r"\bguaranteed\b"]
 OPT_OUT = r"\b(reply|respond|just say) ['\"“]?(no|not interested|stop|unsubscribe)|unsubscribe|opt[- ]out|won'?t (follow up|reach out|email) again|not relevant.{0,40}(let me know|reply)"
+# Footer lines: the opt-out, where the address came from, the privacy notice, a postal address.
+FOOTER = (OPT_OUT + r"|privacy|data protection|\b(found|got|took) your (e-?mail|address|details|contact)"
+          r"|\baddress (came )?from\b|how we (handle|use|process|store) your (data|details)|\bpostal address\b")
+GREETING = r"^\s*(hi|hey|hello|dear|good (morning|afternoon))\b[^.!?]{0,30}[,!]?\s*$"
+SIGN_OFF = r"^\s*(best|thanks|thank you|cheers|regards|warmly|talk soon)\b[^.?!]{0,20}[,!]?\s*$"
 
 
 def split_email(text):
@@ -56,20 +62,23 @@ def check_email(text, step, total):
     errors, warnings, info = [], [], []
     subject, body = split_email(text)
     lowered = body.lower()
-    # Word count for the message itself: stop at the sign-off, and skip opt-out and placeholder lines.
+    # Word count for the message itself, from the first line to the ask: skip the greeting,
+    # stop at a "Best,"-style sign-off, then strip the signature and footer from the end.
     message_lines = []
     for ln in body.splitlines():
-        if re.match(r"^\s*(best|thanks|thank you|cheers|regards|warmly|talk soon)\b[^.?!]{0,20}[,!]?\s*$", ln, re.IGNORECASE):
+        if re.match(SIGN_OFF, ln, re.IGNORECASE):
             break
-        if re.search(OPT_OUT, ln.lower()) or re.match(r"^\s*\[[^\]]*\]\s*$", ln):
-            continue
-        message_lines.append(ln)
-    lines_nonempty = [ln for ln in message_lines if ln.strip()]
-    # drop a trailing name/company signature (short lines after the last sentence-ending line)
-    while lines_nonempty and len(lines_nonempty[-1].split()) <= 4 and not re.search(r"[.?!]$", lines_nonempty[-1].strip()):
-        lines_nonempty.pop()
-    wc = words("\n".join(lines_nonempty))
-    first = next((ln for ln in body.splitlines() if ln.strip() and not re.match(r"^(hi|hey|hello|dear)\b[^.!?]{0,30}[,!]?$", ln.strip(), re.I)), "")
+        if ln.strip() and not (message_lines == [] and re.match(GREETING, ln, re.IGNORECASE)):
+            message_lines.append(ln)
+    while message_lines:
+        last = message_lines[-1].strip()
+        if (re.search(FOOTER, last.lower()) or re.fullmatch(r"\[[^\]]*\]", last)
+                or (len(last.split()) <= 6 and not re.search(r"[.?!]$", last))):
+            message_lines.pop()  # footer line, bracketed placeholder, or name/title/address line
+        else:
+            break
+    wc = words("\n".join(message_lines))
+    first = message_lines[0] if message_lines else ""
 
     if subject is not None:
         sw = words(subject)
@@ -77,6 +86,8 @@ def check_email(text, step, total):
             errors.append(f"subject '{subject}': fake Re:/Fwd: on a first email is deceptive (and a CAN-SPAM problem)")
         if sw > 7:
             warnings.append(f"subject is {sw} words: 2-5 words open and get replies best")
+        elif sw > 5:
+            info.append(f"subject is {sw} words: 2-5 words open and get replies best")
         if subject.isupper() or re.search(r"!|\$\$|free\b", subject, re.IGNORECASE):
             warnings.append(f"subject '{subject}': caps, '!' or 'free' read as spam")
         if re.search(r"quick question", subject, re.IGNORECASE):
@@ -84,11 +95,12 @@ def check_email(text, step, total):
     elif step == 1:
         info.append("no 'Subject:' line found; add one to check it")
 
-    limit = 100 if step == 1 else 60
-    if wc > limit + 20:
-        warnings.append(f"{wc} words: aim for {'50-100' if step == 1 else '1-3 sentences'} ({'first email' if step == 1 else 'follow-up'})")
-    elif step == 1 and wc > 100:
-        info.append(f"{wc} words: under ~80-100 performs best, especially for senior readers")
+    if step == 1 and wc > 100:
+        warnings.append(f"{wc} words: aim for 50-100 in a first email")
+    elif step == 1 and wc > 80:
+        info.append(f"{wc} words: fine, but under 80 does best with senior readers")
+    elif step > 1 and wc > 60:
+        warnings.append(f"{wc} words: follow-ups work best at 1-3 sentences")
 
     if first and re.match(r"^\s*(i|we|my|our)\b", first, re.IGNORECASE):
         warnings.append(f"first line starts with '{first.split()[0]}': make it about them, not you")
@@ -148,6 +160,13 @@ def main():
             problems.append("WARN: no links in a connection note")
         if re.search(r"\b(demo|pricing|our (product|platform|solution)|book a call|15 minutes)\b", note, re.IGNORECASE):
             problems.append("WARN: reads like a pitch; give one reason to connect that's about them")
+        lowered = note.lower()
+        for pat in WORN_OPENERS + SALESY:
+            for m in re.finditer(pat, lowered):
+                problems.append(f"WARN: '{note[m.start():m.end()]}': worn-out or salesy; say why you're connecting with them")
+        for f in scan_ai_signs(note, exclude={"formatting", "rhythm"}):
+            problems.append(f"{'WARN' if f.severity == 'warn' else 'INFO'}: '{f.excerpt}': {f.label} "
+                            f"(ai-writing-signs §{f.section}): {f.note}")
         print("\n".join("  " + p for p in problems) or "  ok")
         return 1 if n > NOTE_LIMIT else 0
 

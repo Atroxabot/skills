@@ -97,7 +97,7 @@ Why it works:
 [What to do instead]
 [Optional: short list of how]
 
-[Acknowledge where the common advice IS right, which builds credibility]
+[Acknowledge where the common advice IS right, which builds credibility. Use the author's own concession if they gave one; otherwise suggest one and flag it in the notes]
 
 [Question inviting experienced disagreement]
 ```

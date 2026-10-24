@@ -33,7 +33,7 @@ Collect:
 - **The sender:** name, role, company and voice. If there's a voice card or style guide (a `voice-profile.md` in the working directory, or one the user pastes), read it. It overrides generic style defaults, and facts it lists about the sender are true material.
 - **Where the recipients are:** the country decides which footer lines the law requires (step 3).
 
-**Never invent** facts about the recipient (posts, quotes, funding, hires), mutual connections, referrals, customer names or results. In outreach a made-up detail is caught at once and kills trust, and a fake referral can be a legal problem too. If a detail is missing, write `[placeholder: what to check]` and say where to find it. Keep it to one or two placeholders; if more are missing, ask.
+**Never invent** facts about the recipient (posts, quotes, funding, hires), mutual connections, referrals, customer names or results. In outreach a made-up detail is caught at once and kills trust, and a fake referral can be a legal problem too. If a detail is missing, write `[placeholder: what to check]` and say where to find it. Keep it to one or two placeholders about the recipient or the proof; if more are missing, ask. Footer placeholders (postal address, where the address came from, the privacy link) don't count toward that, since they're the sender's own details.
 
 If the user wants to blast a big generic list, say plainly what the data shows: sequences to 21–50 recipients got 6.2% replies against 2.4% for 500 or more, and emailing one or two people per company beat three or more. Then help them narrow the list.
 
@@ -71,6 +71,7 @@ Skeletons and examples are in [references/frameworks.md](references/frameworks.m
 
 **The ask**
 - One low-friction question with an easy yes or no: "Worth sending over how [peer] handled it?" or "Is this on your radar this quarter?"
+- Offer only what the sender really has. "Worth sending over…" promises a write-up; if you don't know one exists, ask, or use a plain interest question.
 - Not a 30-minute meeting, and no time slots yet.
 
 **Sign-off and footer**
@@ -78,7 +79,9 @@ Skeletons and examples are in [references/frameworks.md](references/frameworks.m
 - A postal address for US and Canadian recipients.
 - For EU and UK recipients: where the address came from, and a link to a privacy notice.
 
-**Every email in a sequence carries the footer,** follow-ups included, because the rules apply to each message. CAN-SPAM also requires commercial email to be identifiable as an advertisement; the FTC allows flexibility in how, so point US senders to the FTC guide rather than inventing a label. The legal table is in [references/rules.md](references/rules.md). Don't call a message "compliant." Say what's included, and suggest checking local rules (Germany and Canada are stricter).
+**Every email in a sequence carries the footer,** follow-ups included, because the rules apply to each message. CAN-SPAM also requires commercial email to be identifiable as an advertisement; the FTC allows flexibility in how, so point US senders to the FTC guide rather than inventing a label. The legal table is in [references/rules.md](references/rules.md). Don't call a message "compliant." Say what's included, and suggest checking local rules. Canada needs implied consent, and **Germany** treats advertising email without prior consent as unlawful even between businesses: for German recipients, say so, suggest getting it checked, and offer the LinkedIn route first (details in rules.md).
+
+**Recipients who work in another language:** if the trigger (their post, their site) is in another language, offer to write in it, using the formal address (Sie, vous, usted) unless the sender knows them.
 
 ### 4. Write the follow-ups (when asked for a sequence)
 
@@ -122,12 +125,13 @@ It checks the word count and subject length; links, attachments and calendar lin
 
 Unless the user asks otherwise, return:
 
-1. **The email(s),** each with the subject line, body and footer, in a code block so it pastes cleanly. Give the word count of the message itself, not counting the sign-off and footer.
+1. **The email(s),** each with the subject line, body and footer, in a code block so it pastes cleanly. Give the word count of the message itself, from the first line to the ask (not counting the greeting, sign-off and footer).
+   - **LinkedIn or X messages** go in their own code block with a character count. When the user asks for an email and a connection note together, give both, and add the first message to send after they accept.
 2. **Two alternative subject lines,** and one alternative first line if the opener is the riskiest part.
 3. **For sequences:** each step labelled with its send day (Day 1, Day 4, Day 9…) and the new angle it adds.
-4. **Notes,** three bullets at most:
-   - `[placeholders]` to verify
-   - any legal lines the user must add for their region
+4. **Notes,** a few short bullets, only those that apply:
+   - `[placeholders]` and anything to verify before sending (the trigger's wording, permission to name the customer)
+   - legal lines or warnings for the recipient's country
    - one targeting tip if the list looks too broad
 
 **When reviewing the user's own outreach:** diagnose the subject, first line, relevance, length, ask, follow-ups and AI tells, quoting their lines. Then rewrite it, keeping every true detail.

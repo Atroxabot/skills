@@ -37,7 +37,7 @@ Subject: [2–5 words about their situation]
 [Role, Company]
 [Opt-out line] [Address if US/Canada]
 ```
-**Example** (79 words):
+**Example** (59 words in the message, not counting the greeting, sign-off and footer):
 ```
 Subject: 4 open SDR roles
 

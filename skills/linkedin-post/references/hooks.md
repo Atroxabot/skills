@@ -23,6 +23,8 @@ Dated sources for these figures are in [platform.md](platform.md).
 
 Each formula has a template and an example. The examples are illustrative and invented for this file; never present their details as the user's own.
 
+Some formulas (dated anecdotes, moments in time, number + promise) need a longer first line. That's fine when it earns it, but check that the whole hook still lands inside the mobile cut.
+
 **1. Specific event + stakes**
 `[Something that happened], [when it happened / what was at stake].`
 > I got fired the week we hit $1M ARR.
@@ -50,9 +52,9 @@ Variant: `How to [outcome] in under [time].`
 
 **7. Villain → momentum → stance**
 Also from Justin Welsh: line one names something the reader dislikes, line two shows it's changing, line three gives the author's stance and a reason to click.
-> Status meetings are dying.
-> Three of our five teams dropped them this year.
-> Nobody misses them. Here's what replaced them.
+> Annual reviews are on their way out.
+> Two of the three companies I've worked at dropped them.
+> Good riddance. Here's what took their place.
 
 **8. Data observation**
 `We [looked at N things]. [Surprising finding].`
