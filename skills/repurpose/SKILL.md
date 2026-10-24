@@ -74,36 +74,37 @@ Skip any platform the source has nothing good for. Ten mediocre fragments from o
 
 ### 5. Write each piece natively
 
-Apply each platform's rules. If the linkedin-post skill is installed, follow its workflow for LinkedIn posts; it goes deeper on hooks and structure. For every other format, use the condensed per-platform guide in [references/adaptation.md](references/adaptation.md). Either way:
+Apply each platform's rules. If the linkedin-post skill is installed (it shows in your list of available skills), follow its workflow for LinkedIn posts; it goes deeper on hooks and structure. For every other format, use the condensed per-platform guide in [references/adaptation.md](references/adaptation.md). Either way:
 
 - **Write a new hook for each platform.** Never reuse one hook everywhere.
 - **Cut, don't compress.** Pick fewer points rather than squeezing all of them in.
 - **Match the platform's length, tone, links, hashtags and call to action** (the element-by-element table is in adaptation.md).
-- **Keep the author's real details.** Never add claims, numbers or stories the source doesn't contain.
+- **Keep the author's real details.** Never add claims, numbers or stories the source doesn't contain. Before pairing a "before" and an "after" number, check they measure the same thing ("400 orders to the wrong address" and "mis-picks down to 1 in 500" may not); if you can't tell, keep them apart and ask in the notes.
 - **Write the parts the format needs.** A carousel caption frames slides, and a Reel caption frames a video. If those don't exist yet, write the slide copy or the script too, and list them under the visuals that still need making.
+- **Video scripts:** label every spoken line with who says it (`VO:`, `PRIYA:`, `HOST (00:12:33):`) and every direction with what it is (`ON-SCREEN:`, `VISUAL:`, `B-ROLL:`), so the editor (and the checker below) can tell speech from directions. A script to record is timed by its words, at about 150–180 a minute; a clip cut from existing footage is timed by its in and out points.
 - **Edit like a person wrote it.** Read [references/ai-writing-signs.md](references/ai-writing-signs.md) and fix causes, not words. A batch of pieces is especially prone to one template repeated across all of them (the same opener shape, the same closing question), so vary them on purpose. If the humanizer skill is installed, it does this pass in more depth.
 
 ### 6. Handle transcripts and other people's words
 
 - **The author's own speech:** rewrite freely into prose in their voice. Keep distinctive phrasing; cut filler, repetition and tangents.
-- **Guests and other speakers:** anything in quotation marks must be what they said. Removing "um" and false starts is fine; changing words, merging moments or reordering isn't. Otherwise paraphrase without quotation marks and attribute by name.
+- **Guests and other speakers:** anything in quotation marks must be what they said. Removing "um" and false starts is fine; changing words, merging moments or reordering isn't. Quoting only part of a line with an ellipsis is fine when the meaning stays the same. Otherwise paraphrase without quotation marks and attribute by name.
 - **Never present a guest's story or result as the author's.**
-- **Permission:** a credit isn't permission. Before producing clips or quote cards of another person's face, voice or words, ask the user to confirm they have it (a signed guest release, for example).
-- **Garbled transcript at the key moment:** flag `[unclear at 14:32]`. Don't guess.
-- **For every quote and clip,** give HH:MM:SS start and end times so it can be checked and cut.
+- **Permission:** a credit isn't permission. Clips and quote cards of another person's face, voice or words need it (a signed guest release, for example). You can draft them, but put the permission check first in the notes and say not to post until the user has confirmed it.
+- **Garbled transcript at the key moment:** flag `[unclear at 14:32]`. Don't guess, and don't quote across the gap.
+- **For every quote and clip,** give HH:MM:SS start and end times so it can be checked and cut. When the transcript has only start times, use the next line's start as the end and say so; when a clip starts partway through a line, give that line's time and the first words to cut in on.
 
 ### 7. Plan the schedule
 
 - **Two orders both work:**
   - **Long first, then the pieces:** publish the source on a channel the author owns, then release the pieces over the following days.
   - **Small first, then expand:** test angles as short posts, then build the long version from what got traction.
-- **Schedule each piece for its own platform's best time.** Don't release everything on one day; pieces on the same platform compete with each other. LinkedIn does best at 2–4 posts a week, never more than one a day.
+- **Spread the pieces out.** Don't release everything on one day; pieces on the same platform compete with each other. LinkedIn does best at 2–4 posts a week, never more than one a day. For the hour, go by the user's own analytics; spacing matters more than the time of day, so don't invent precise "best times."
 - **Later re-runs on the same platform:** rewrite the piece, don't repost it. LinkedIn demotes "recycled" posts, X limits copypasta, and Instagram demotes Reels it has already seen.
 - **Video:** export clean files without another app's watermark. A Short downloaded from YouTube Studio carries one.
 
 ### 8. Check the batch
 
-If you can run code, save the pieces in one file, each under a header line naming its platform, and run:
+If you can run code, save the pieces in one file, each under a header line naming its platform (add a label after a colon when a platform has several pieces: `=== linkedin: post 2 ===`), and run:
 
 ```
 python3 scripts/check_pieces.py pieces.txt --source source.txt
@@ -124,7 +125,7 @@ The file looks like this. Separate the posts of an X thread, a Threads chain or 
 
 Platform names: `linkedin`, `x` (`x-thread`, or `x-premium` for long posts), `threads`, `bluesky`, `instagram`, `carousel`, `video`.
 
-It checks each piece against its platform's limit (counting characters the way each platform does), hashtag caps, links and leftovers from other platforms, and AI-writing signs. Across the batch it flags reused hooks, closers and hashtag blocks, and sentences copied word for word between pieces. With `--source`, it also lists numbers that don't appear in the source and quoted text that isn't verbatim, which are the two most common ways a repurposed piece drifts from the truth. Treat every hit as a reason to look again, not an automatic rewrite: a derived number ("doubled") can be fine.
+It checks each piece against its platform's limit (counting characters the way each platform does), hashtag caps, links and leftovers from other platforms, and AI-writing signs outside quotations. For a video script it estimates the spoken length. Across the batch it flags reused hooks, closers and hashtag blocks, and sentences copied word for word between pieces. With `--source`, it lists numbers that don't appear in the source, quoted text that isn't verbatim or that joins separate moments, and, for a transcript, who said each quote and when, so you can check the attribution. These are the most common ways a repurposed piece drifts from the truth. It doesn't judge hooks or the first seconds of a video; read those yourself. Treat every hit as a reason to look again, not an automatic rewrite: a derived number ("doubled") can be fine.
 
 ## Output
 
@@ -135,8 +136,8 @@ Return:
 3. **The pieces,** grouped by platform. Each is ready to paste, in a code block, with its format and character or word count.
 4. **A schedule:** a simple table of day, platform, piece and why.
 5. **Notes:**
+   - permissions to confirm, first, when the pieces use someone else's words, voice or face
    - quotes and clips with timestamps
-   - permissions to confirm
    - `[placeholders]`
    - pieces that need visuals (carousel design, a video shoot)
    - the account assumption, if the user didn't say

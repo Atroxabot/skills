@@ -75,10 +75,18 @@ BAIT = [
     r"\bfollow (me )?for more\b",
     r"^\s*(agree|thoughts|what do you think)\s*\??\s*(👇)?\s*$",
 ]
-SPOKEN_LABEL = re.compile(r"^\s*(vo|v/o|voice ?over|narration|narrator|say|spoken|audio|host|speaker)\s*:", re.IGNORECASE)
-NON_SPOKEN = re.compile(
-    r"^\s*([\[(#]|(on[- ]screen|text|visual|b-?roll|shot|scene|caption|cut|sfx|music|overlay)\b[^:]{0,20}:|\d{1,2}:\d{2})",
-    re.IGNORECASE)
+# Script lines look like "PRIYA (00:12:33): ...", "VO: ...", "0:03 ON-SCREEN: ...". A label is
+# speech when it's a known voice label or a name (every word capitalized); it's a direction when
+# any of its words is a production term.
+TIMESTAMP = r"\[?\d{1,2}:\d{2}(?::\d{2})?\]?"
+LABEL_RE = re.compile(r"^\s*(?:" + TIMESTAMP + r"\s*[-–]?\s*)?([A-Za-z][\w.&'/ -]{0,30}?)\s*(\([^)]*\))?\s*:\s*(.*)$")
+VOICE_LABELS = {"vo", "v/o", "voiceover", "voice over", "voice-over", "narration", "narrator", "say", "spoken",
+                "host", "speaker", "guest", "me", "you"}
+DIRECTION_WORDS = {"on-screen", "onscreen", "screen", "text", "visual", "visuals", "b-roll", "broll", "shot", "scene",
+                   "caption", "captions", "cut", "sfx", "music", "sound", "overlay", "out", "in", "end", "card", "title",
+                   "cover", "note", "notes", "length", "runtime", "duration", "format", "clip", "reel", "reels",
+                   "short", "shorts", "tiktok", "graphic", "graphics", "transition", "frame", "thumbnail", "edit",
+                   "location", "props", "setup", "from", "lower", "third"}
 FILLERS = {"um", "uh", "erm", "er", "ah", "uhm", "hmm", "mm"}
 HASHTAG_RE = re.compile(r"(?<![\w&#])#\w*[A-Za-z]\w*")
 URL_RE = re.compile(
@@ -152,9 +160,45 @@ UNITS = {"chars": "characters", "x": "weighted characters", "threads": "characte
 
 
 def norm(text):
+    """Lowercase words without punctuation, filler or repeated false starts ("we, uh, we" -> "we")."""
     text = text.lower().replace("’", "'").replace("‘", "'")
-    text = re.sub(r"[^\w\s']", " ", text)
-    return " ".join(w for w in text.split() if w not in FILLERS)
+    out = []
+    for w in re.sub(r"[^\w\s']", " ", text).split():
+        if w not in FILLERS and not (out and out[-1] == w):
+            out.append(w)
+    return " ".join(out)
+
+
+def unquoted(text):
+    """Text with quotations blanked out, keeping positions: a guest's verbatim words aren't the author's to fix."""
+    return re.sub(r"[\"“][^\"”\n]*[\"”]", lambda m: " " * len(m.group(0)), text)
+
+
+def spoken_lines(script):
+    """The speech in a video script: labelled voice lines, or every non-direction line if nothing is labelled."""
+    spoken, any_voice, prev_voice = [], False, False
+    unlabelled = []
+    for ln in script.splitlines():
+        if not ln.strip():
+            continue
+        m = LABEL_RE.match(ln)
+        label = m.group(1).strip() if m else ""
+        words = label.lower().replace("-", " ").split() if m else []
+        is_voice = bool(m) and (label.lower() in VOICE_LABELS or (
+            not any(w in DIRECTION_WORDS or w.replace(" ", "-") in DIRECTION_WORDS for w in words)
+            and all(w[0].isupper() for w in label.split())))
+        is_direction = bool(m) and not is_voice and (
+            any(w in DIRECTION_WORDS for w in words) or "on screen" in " ".join(words))
+        if is_voice:
+            spoken.append(m.group(3))
+            any_voice = prev_voice = True
+        elif is_direction or re.match(r"^\s*[\[(#]", ln):
+            prev_voice = False
+        else:
+            unlabelled.append(ln)
+            if prev_voice:
+                spoken.append(ln)  # a voice line that runs onto the next line
+    return spoken if any_voice else unlabelled
 
 
 def first_line(text):
@@ -170,9 +214,12 @@ def sentences(text):
     return [s.strip() for s in re.split(r"(?<=[.!?])\s+|\n+", text) if s.strip()]
 
 
-def numbers(text):
-    """Numeric values in text, as floats, ignoring timestamps and thread counters like 2/5."""
+def numbers(text, skip_durations=False):
+    """Numeric values in text, as floats, ignoring timestamps and thread counters like 2/5.
+    With skip_durations, also ignore lengths like "40 seconds" (production notes in a script)."""
     text = re.sub(r"\b\d{1,2}:\d{2}(:\d{2})?\b|\b\d+/\d*(?=\s|$)", " ", text)
+    if skip_durations:
+        text = re.sub(r"\b\d+(\.\d+)?\s?(s|secs?|seconds?|mins?|minutes?)\b", " ", text, flags=re.IGNORECASE)
     found = []
     for m in re.finditer(r"(?<![\w.])[$€£]?(\d[\d,]*(?:\.\d+)?)\s?(k|m|bn|b|million|billion|thousand)?\b", text, re.IGNORECASE):
         try:
@@ -195,7 +242,8 @@ def parse(raw):
             current["lines"].append(line)
     if not pieces and raw.strip():
         sys.exit("No '=== platform ===' header found. Put each piece under a header line, e.g. '=== linkedin ==='.")
-    for p in pieces:
+    for i, p in enumerate(pieces, 1):
+        p["index"] = i
         p["platform"] = ALIASES.get(p["name"], p["name"])
         body = "\n".join(p["lines"]).strip("\n")
         p["parts"] = [s.strip("\n") for s in re.split(r"^\s*---\s*$", body, flags=re.MULTILINE) if s.strip()]
@@ -262,12 +310,10 @@ def check_piece(p):
         if URL_RE.search(text):
             info.append("link on a slide: links inside a PDF carousel don't work")
     if plat == "video":
-        lines = [ln for ln in text.splitlines() if ln.strip()]
-        labeled = [SPOKEN_LABEL.sub("", ln) for ln in lines if SPOKEN_LABEL.match(ln)]
-        spoken = labeled or [ln for ln in lines if not NON_SPOKEN.match(ln)]
-        wc = len(re.findall(r"[\w'’-]+", " ".join(spoken)))
-        lo, hi = wc / 3.0, wc / 2.5
-        summary = f"~{wc} spoken words, about {lo:.0f}-{hi:.0f} s at 150-180 words a minute"
+        wc = len(re.findall(r"[\w'’-]+", " ".join(spoken_lines(text))))
+        lo, hi = round(wc / 3.0), round(wc / 2.5)
+        summary = (f"~{wc} spoken words, about {lo if lo == hi else f'{lo}-{hi}'} s at 150-180 words a minute "
+                   "(a clip's length comes from its timestamps)")
         if lo > 180:
             warnings.append("over 3 minutes: Reels and Shorts are recommended only up to 3 minutes")
         elif hi > 60:
@@ -292,7 +338,7 @@ def check_piece(p):
     if handles:
         info.append(f"handles {', '.join(handles)}: check each one exists on {plat} and is the right account")
 
-    prose = re.sub(r"^[ \t]*(#\w+[ \t]*)+$", "", text, flags=re.MULTILINE)
+    prose = unquoted(re.sub(r"^[ \t]*(#\w+[ \t]*)+$", "", text, flags=re.MULTILINE))
     weak = 0
     for f in scan_ai_signs(prose, exclude={"formatting"}):
         if f.severity == "warn":
@@ -311,10 +357,10 @@ def check_batch(pieces):
 
     def groups(key):
         seen = {}
-        for i, p in enumerate(pieces, 1):
+        for p in pieces:
             k = key(p)
             if k:
-                seen.setdefault(k, []).append(i)
+                seen.setdefault(k, []).append(p["index"])
         return {k: v for k, v in seen.items() if len(v) > 1}
 
     for k, idx in groups(lambda p: norm(first_line(p["parts"][0]))).items():
@@ -331,9 +377,9 @@ def check_batch(pieces):
                          if len(HASHTAG_RE.findall(p["text"])) >= 2 else "").items():
         warnings.append(f"pieces {', '.join(map(str, idx))} share a hashtag block ({k}): never carry one platform's tags to another")
     copies = {}
-    for i, p in enumerate(pieces, 1):
-        for s in {norm(s) for s in sentences(p["text"]) if len(s.split()) >= 10}:
-            copies.setdefault(s, set()).add(i)
+    for p in pieces:
+        for s in {norm(s) for s in sentences(unquoted(p["text"])) if len(s.split()) >= 10}:
+            copies.setdefault(s, set()).add(p["index"])
     for s, idx in copies.items():
         if len(idx) > 1:
             info.append(f"sentence copied word for word into pieces {', '.join(map(str, sorted(idx)))} "
@@ -341,13 +387,42 @@ def check_batch(pieces):
     return warnings, info
 
 
+def source_turns(source):
+    """Normalize the source line by line. Returns (text, spans), where spans holds
+    (start, end, turn, speaker, timestamp) for each line. A turn starts at each line
+    with a timestamp or a speaker label (PRIYA:, ME:), so a transcript's turns are its
+    moments; a source without labels is a single turn."""
+    parts, spans, pos, turn, speaker, stamp = [], [], 0, 0, None, None
+    for ln in source.splitlines():
+        ts = re.match(r"^\s*" + TIMESTAMP, ln)
+        rest = ln[ts.end():] if ts else ln
+        sp = re.match(r"^\s*([A-Za-z][\w.&' -]{0,30}?)\s*(\([^)]*\))?\s*:\s*", rest)
+        is_speaker = bool(sp) and all(w[0].isupper() for w in sp.group(1).split())
+        if ts or is_speaker:
+            turn += 1
+            stamp = ts.group(0).strip("[] ") if ts else None
+            speaker = sp.group(1).strip() if is_speaker else speaker
+        body = norm(rest[sp.end():] if is_speaker else rest)
+        if body:
+            parts.append(body)
+            spans.append((pos, pos + len(body), turn, speaker, stamp))
+            pos += len(body) + 1
+    return " ".join(parts), spans
+
+
+def turn_at(spans, offset):
+    return next((sp for sp in spans if sp[0] <= offset <= sp[1]), None)
+
+
 def check_source(pieces, source):
     warnings, info = [], []
     known = [v for _, v in numbers(source)]
-    src = norm(source)
-    for i, p in enumerate(pieces, 1):
+    src, spans = source_turns(source)
+    labelled = any(sp[3] or sp[4] for sp in spans)
+    for p in pieces:
+        i = p["index"]
         missing = []
-        for shown, value in numbers(p["text"]):
+        for shown, value in numbers(p["text"], skip_durations=p["platform"] == "video"):
             if not any(abs(value - k) <= 1e-9 * max(1.0, abs(k)) for k in known) and shown not in missing:
                 missing.append(shown)
         big = [s for s in missing if numbers(s) and numbers(s)[0][1] > 10]
@@ -358,19 +433,34 @@ def check_source(pieces, source):
             info.append(f"piece {i}: small numbers not in the source: {', '.join(small)} (fine for counts like '3 lessons')")
         for m in re.finditer(r"[\"“]([^\"”\n]+)[\"”]", p["text"]):
             quote = m.group(1)
-            if len(quote.split()) < 4:
+            if len(quote.split()) < 3:
                 continue
-            segments = [norm(s) for s in re.split(r"\.\.\.|…", quote) if len(norm(s).split()) >= 3]
-            pos, ok = 0, True
+            segments = [norm(s) for s in re.split(r"\.\.\.|…", quote) if len(norm(s).split()) >= 2]
+            found, pos, crosses = [], 0, False
             for seg in segments:
                 at = src.find(seg, pos)
+                while at >= 0:  # the segment must sit inside one line of the source
+                    first, last = turn_at(spans, at), turn_at(spans, at + len(seg))
+                    if first and last and first[2] == last[2]:
+                        break
+                    at = src.find(seg, at + 1)
                 if at < 0:
-                    ok = False
+                    crosses = src.find(seg, pos) >= 0  # present, but only across two moments
                     break
+                found.append(turn_at(spans, at))
                 pos = at + len(seg)
-            if segments and not ok:
+            if not segments:
+                continue
+            if len(found) < len(segments) and not crosses:
                 warnings.append(f"piece {i}: quoted text isn't verbatim in the source: \"{quote[:70]}\"; "
-                                "quote exactly (minus filler) or paraphrase without quotation marks")
+                                "quote exactly (minus filler and false starts) or paraphrase without quotation marks")
+            elif crosses or len({sp[2] for sp in found}) > 1:
+                warnings.append(f"piece {i}: the quote \"{quote[:60]}\" joins separate moments of the source; "
+                                "quote one moment, or paraphrase")
+            elif labelled:
+                sp = found[0]
+                who = " ".join(x for x in (sp[3], f"at {sp[4]}" if sp[4] else "") if x)
+                info.append(f"piece {i}: \"{quote[:50]}\" is said by {who}: check the attribution and timestamp")
     return warnings, info
 
 
