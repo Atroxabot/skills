@@ -134,10 +134,10 @@ For long documents, revise in sections. Keep the author's structure unless the s
 
 ## Working with other writing skills
 
-Platform writing skills often run a short tell checklist in their own editing step. Use this skill when:
+The linkedin-post, repurpose and cold-outreach skills in this collection carry their own copy of the catalog and run a shorter version of this pass in their editing step. Use this skill when:
 - the user asks for a humanizing pass on its own
 - the text isn't a social post (emails, bios, blog drafts, newsletters, product copy)
-- the user wants a deeper edit than another skill's checklist
+- the user wants a deeper edit than a writing skill's own checklist
 
 ## References
 

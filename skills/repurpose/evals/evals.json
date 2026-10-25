@@ -1,0 +1,54 @@
+{
+  "skill_name": "repurpose",
+  "evals": [
+    {
+      "id": 1,
+      "name": "repurpose-pricing-blog",
+      "prompt": "repurpose this blog post into a linkedin post, an x thread and an instagram caption for a carousel.\n\n---\nWhy we doubled our price and lost almost nobody\n\nIn March we raised our plan from $49 to $99 a month. We have about 1,400 customers. We braced for a wave of cancellations. 23 people left in the first 60 days, and 9 of those told us price was the reason.\n\nHere's what we learned.\n\nFirst, we had been pricing against our competitors instead of against the value. Our customers use us to send invoices; the median customer sends $38,000 a month through us. $49 was a rounding error to them, and it made us look small.\n\nSecond, we grandfathered nobody, but we gave 90 days notice and a personal email from me to every customer over 2 years old. Several replied to say they'd wondered why we were so cheap.\n\nThird, the customers who left were mostly the ones filing the most support tickets. Support volume dropped 18% the next quarter.\n\nWhat I'd do differently: test it on new signups first. We could have learned the same thing with less stress.\n\n- Dana Kim, founder, Invoicely\n",
+      "expected_output": "A thesis line, an atom inventory, and three platform-native pieces, each with its own hook and structure: a LinkedIn story/lesson post of roughly 900-1,500 characters, an X thread whose first post stands alone, and an Instagram caption that frames carousel slides (with the slide copy, or a note that it's needed). Only the source's facts ($49 to $99, about 1,400 customers, 23 left, 9 over price, $38,000 median, 90 days, support down 18%), no cross-platform leftovers, varied templates, and a schedule.",
+      "files": [],
+      "assertions": [
+        "Gives a one-line thesis and a short atom inventory",
+        "The three pieces open with three different hooks",
+        "Uses no numbers or facts that aren't in the source (derived wording like 'doubled' is fine)",
+        "The X thread's first post makes sense on its own, and any link sits in the last post",
+        "The Instagram caption has 0-5 hashtags, no clickable-link promise in the caption, and frames the carousel slides",
+        "No platform leftovers: no 'link in bio' outside Instagram, no 'retweet' or thread emoji outside X, no markdown in the posts",
+        "The pieces don't all end with the same kind of closing question",
+        "Includes a schedule that spreads the pieces over several days"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "repurpose-podcast-guest",
+      "prompt": "I host a podcast called Small Shop Ops. Can you turn this bit of last week's episode into 2 LinkedIn posts and a short clip script for Reels? Posting from my own profile.\n\n[00:12:04] ME: So when did you realize the warehouse was the problem?\n[00:12:09] PRIYA (guest, founder of Kiln & Co): Honestly, um, it was the Christmas we shipped 3,000 orders and 400 of them went to the wrong address. Four hundred. We'd hired eight temps and none of them had seen the pick list format before.\n[00:12:31] ME: That's brutal.\n[00:12:33] PRIYA: The fix was boring. We, uh, we printed the pick lists in the same order as the shelves. Mis-picks dropped to about 1 in 500 the next season.\n[00:12:51] ME: I see this with almost every shop I talk to. The process lives in one person's head, and the first time volume spikes, it breaks.\n[00:13:02] PRIYA: Yeah. If it isn't written down, it's not a process, it's a [inaudible].\n[00:13:08] ME: Ha. Okay, let's talk about returns.",
+      "expected_output": "Pieces that keep Priya's story as hers (attributed by name, never told as the host's), quote her only verbatim (filler like 'um' removed) with HH:MM:SS timestamps, don't complete the inaudible line, use the host's own observation (process lives in one person's head) as the host's view, add no numbers beyond 3,000, 400, eight temps and 1 in 500, and flag that the host should confirm a guest release before posting a clip of Priya. The Reels script has a hook in the first 3 seconds and fits under about 60 seconds.",
+      "files": [],
+      "assertions": [
+        "Never presents Priya's warehouse story or numbers as the host's own experience",
+        "Every quotation attributed to Priya matches the transcript word for word apart from removed filler",
+        "Does not fill in or guess the [inaudible] word, and doesn't put words in quotation marks that weren't said",
+        "Gives HH:MM:SS start and end times for quotes or the clip",
+        "Flags that the host should confirm they have Priya's permission (a guest release) before clipping or quoting her",
+        "Adds no numbers or facts beyond the transcript (3,000 orders, 400 wrong, eight temps, about 1 in 500)",
+        "The two LinkedIn posts use different angles and different hooks",
+        "The Reels script opens on the hook within about 3 seconds and runs under about 60 seconds"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "repurpose-single-adaptation",
+      "prompt": "turn this linkedin post into a tweet and a bluesky post\n\nI almost fired our best engineer in her first month.\n\nShe'd shipped nothing in three weeks. Every standup: \"still digging.\"\n\nThen she sent a 4-page doc tracing our checkout bug, the one that had burned two senior devs and three sprints, to a race condition in a library we didn't know we depended on.\n\nThe fix was 11 lines.\n\nNow I ask new hires \"what have you learned?\" before \"what have you shipped?\"\n\nWhat's a signal you misread in a new hire?\n\n#engineering #leadership #hiring",
+      "expected_output": "Skips the full inventory and schedule. Gives one X post within 280 weighted characters and one Bluesky post within 300 graphemes, each with its own hook and tone, keeping the real details (three weeks, 4-page doc, two senior devs, three sprints, 11 lines), dropping the LinkedIn hashtag block, and explaining what changed in two or three bullets.",
+      "files": [],
+      "assertions": [
+        "Does not produce a full atom inventory or schedule",
+        "The X post is within 280 weighted characters and the Bluesky post within 300 characters",
+        "The two posts are not the same text",
+        "Keeps the real details and adds none",
+        "Drops the LinkedIn hashtag block (0-1 hashtags on X, 0-2 on Bluesky)",
+        "Explains what changed in two or three bullets"
+      ]
+    }
+  ]
+}

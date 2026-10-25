@@ -1,0 +1,52 @@
+{
+  "skill_name": "linkedin-post",
+  "evals": [
+    {
+      "id": 1,
+      "name": "li-seed-round",
+      "prompt": "I just closed our seed round — $3.2M led by Hustle Fund after 47 investor meetings and something like 41 nos. Took 7 months. Biggest lesson honestly was that we pitched the product way too much and the market not enough; once we flipped the deck to lead with the market shift (small clinics getting pushed into value-based care contracts) it took 3 weeks to fill the round. Write me a LinkedIn post about it. I'm the cofounder of Carelane, we do care coordination software for small clinics.",
+      "expected_output": "A plain-text LinkedIn post (no markdown) with a short, specific hook inside ~140 characters, built on the user's real numbers (47 meetings, 41 nos, 7 months, 3 weeks, $3.2M), one clear lesson (pitch the market shift, not the product), no invented details, no engagement bait or AI tells, plus two alternative hooks and brief notes.",
+      "files": [],
+      "assertions": [
+        "The post contains no markdown bold or headings",
+        "The first line is under ~140 characters",
+        "Uses at least three of the user's real specifics",
+        "Does not invent investor names, quotes or metrics the user didn't give",
+        "No 'It's not X, it's Y' reframe and none of the stock phrases the skill lists",
+        "No engagement bait (comment YES, 'Agree?', like if)",
+        "0-3 hashtags and at most 1 emoji",
+        "Provides two alternative hooks"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "li-fix-draft",
+      "prompt": "can you fix my linkedin post before I post it tomorrow morning. be honest\n\n---\n🚀 In today's fast-paced world of product management, I've learned that it's not about building features, it's about solving problems.\n\nLast quarter our team shipped 23 features. Our NPS went down.\n\nHere's the thing: customers don't care about your roadmap. They care about outcomes.\n\nSo we made a change. We cut our roadmap in half and spent 6 weeks doing nothing but customer interviews (62 of them!).\n\nThe result? Retention up 14%. Support tickets down 30%.\n\n✅ Listen more\n✅ Build less\n✅ Measure what matters\n\nLet that sink in. 💡\n\nAgree? Comment \"YES\" if you've seen this too! 👇\n\n#productmanagement #product #leadership #startups #customerexperience #growth\n---",
+      "expected_output": "An honest diagnosis quoting the weak lines (cliché opener, 'it's not X it's Y', 'Here's the thing', 'The result?', emoji bullets, 'Let that sink in', engagement bait, six hashtags), then a rewrite that leads with the strong real material (23 features, NPS down, 62 interviews, +14% retention, -30% tickets) and keeps the user's facts.",
+      "files": [],
+      "assertions": [
+        "The diagnosis flags the engagement bait ('Comment YES')",
+        "The diagnosis flags the AI-tell phrases",
+        "The rewrite keeps all the user's real numbers and adds no new ones",
+        "The rewrite's hook leads with a concrete specific (for example 23 features and NPS down)",
+        "The rewrite has no emoji bullets and at most 3 hashtags",
+        "The rewrite contains none of the flagged phrases"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "li-topic-only",
+      "prompt": "write a linkedin post about why engineering managers should stop doing weekly status meetings. I'm an eng manager at a fintech, 12 people on my team. make it good",
+      "expected_output": "Either one short round of questions or a draft built on a structure that doesn't depend on invented personal claims (contrarian take, observation or how-to), using only the given facts (eng manager, fintech, team of 12). Any personal result, metric or anecdote is a marked [placeholder] or a question, not an invented story. Plain text, short hook, no bait, two alternative hooks and notes listing what to fill in.",
+      "files": [],
+      "assertions": [
+        "Does not invent a story, metric or result about the user's team (for example hours saved, a quote from a team member, or a specific incident) and present it as true",
+        "Any missing personal detail is a clearly marked [placeholder] or a question in the notes, with no more than three placeholders in the post",
+        "Uses a structure that works without personal claims (contrarian take, observation, how-to or framework) or a story structure with placeholders",
+        "The hook is a claim, not a question, and fits in ~140 characters",
+        "Plain text with no markdown, at most 1 emoji and at most 3 hashtags",
+        "No engagement bait and no 'It's not X, it's Y' reframe"
+      ]
+    }
+  ]
+}
